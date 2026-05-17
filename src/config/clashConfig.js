@@ -24,7 +24,7 @@ export const CLASH_CONFIG = {
 	},
 	'dns': {
 		'enable': true,
-		'ipv6': true,
+		'ipv6': false,
 		'respect-rules': true,
 		'enhanced-mode': 'fake-ip',
 		'fake-ip-filter': [
@@ -174,23 +174,17 @@ export const CLASH_CONFIG = {
 		    '+.pub.3gppnetwork.org',
 		],
 		'nameserver': [
+			'tls://223.5.5.5',
+			'tls://223.6.6.6',
 			'https://120.53.53.53/dns-query',
 			'https://223.5.5.5/dns-query'
 		],
 		'proxy-server-nameserver': [
+			'tls://223.5.5.5',
+			'tls://223.6.6.6',
 			'https://120.53.53.53/dns-query',
 			'https://223.5.5.5/dns-query'
-		],
-		'nameserver-policy': {
-			'geosite:cn,private': [
-				'https://120.53.53.53/dns-query',
-				'https://223.5.5.5/dns-query'
-			],
-			'geosite:geolocation-!cn': [
-				'https://dns.cloudflare.com/dns-query',
-				'https://dns.google/dns-query'
-			]
-		}
+		]
 	},
 	'proxies': [],
 	'proxy-groups': [
