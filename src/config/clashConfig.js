@@ -193,5 +193,11 @@ export const CLASH_CONFIG = {
 		}
 	},
 	'proxies': [],
-	'proxy-groups': []
+	'proxy-groups': [
+		{
+		"name": "Custom-DIRECT",
+		"type": "select",
+		"proxies": ["DIRECT"]
+	}
+	]
 };
