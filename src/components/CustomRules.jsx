@@ -256,6 +256,12 @@ export const CustomRules = (props) => {
             jsonValid: false,
             
             init() {
+              // Initialize with default CUSTOM_RULES from window.CUSTOM_RULES if available
+              if (window.CUSTOM_RULES && Array.isArray(window.CUSTOM_RULES) && window.CUSTOM_RULES.length > 0) {
+                this.rules = JSON.parse(JSON.stringify(window.CUSTOM_RULES)); // Deep copy
+                this.jsonContent = JSON.stringify(window.CUSTOM_RULES, null, 2);
+              }
+
               // Watch for changes in rules to update JSON content
               this.$watch('rules', (value) => {
                 if (this.mode === 'form') {

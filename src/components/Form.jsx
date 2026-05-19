@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource hono/jsx */
-import { PREDEFINED_RULE_SETS, UNIFIED_RULES } from '../config/index.js';
+import { PREDEFINED_RULE_SETS, UNIFIED_RULES, CUSTOM_RULES } from '../config/index.js';
 import { CustomRules } from './CustomRules.jsx';
 import { TextareaWithActions } from './TextareaWithActions.jsx';
 import { ValidatedTextarea } from './ValidatedTextarea.jsx';
@@ -40,6 +40,7 @@ export const Form = (props) => {
   const scriptContent = `
     window.APP_TRANSLATIONS = ${JSON.stringify(translations)};
     window.PREDEFINED_RULE_SETS = ${JSON.stringify(PREDEFINED_RULE_SETS)};
+    window.CUSTOM_RULES = ${JSON.stringify(CUSTOM_RULES)};
     window.APP_LANG = ${JSON.stringify(lang || 'zh-CN')};
     if (typeof __name === 'undefined') { var __name = function(fn) { return fn; }; }
     (${formLogicFn.toString()})();
