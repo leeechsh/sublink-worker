@@ -3,7 +3,54 @@
  * Contains unified rule structure and predefined rule sets
  */
 
-export const CUSTOM_RULES = [];
+export const CUSTOM_RULES = [
+	  {
+    "name": "Custom-Proxy",
+    "domain_suffix": [
+      "ocsp.apple.com",
+      "digicert.com",
+      "entrust.net",
+      "ocsp.verisign.net",
+      "apps.apple.com",
+      "itunes.apple.com",
+      "blobstore.apple.com",
+      "huggingface.co",
+      "discord.gg",
+      "hf.space",
+      "reddit.com",
+      "steamcommunity.com",
+      "linux.do",
+      "imgurl.org",
+      "wandb.ai",
+      "access-point.cloudmessaging.edge.microsoft.com",
+      "sydney.bing.com",
+      "browser.pipe.aria.microsoft.com",
+      "designer.microsoft.com",
+      "edge.microsoft.com",
+      "copilot.microsoft.com",
+      "edgeservices.bing.com",
+      "functional.events.data.microsoft.com",
+      "www.bingapis.com"
+    ]
+    },
+    {
+    "name": "Custom-DIRECT",
+    "domain_suffix": [
+      "acm.org",
+      "ieee.org",
+      "mzstatic.com",
+      "me.com",
+      "akadns.net",
+      "aaplimg.com",
+      "steampowered.com",
+      "sciencedirect.com",
+      "patronums.top",
+	  "leee.space",
+	  "cslee.cc",
+      "metaiot.group"
+    ]
+    }
+];
 
 export const UNIFIED_RULES = [
 	{
