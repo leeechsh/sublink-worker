@@ -171,6 +171,7 @@ export const CLASH_CONFIG = {
 		    'ps.res.netease.com',
 		    '+.cslee.cc',
 		    '+.metaiot.group',
+			'+.leee.space',
 		    '+.pub.3gppnetwork.org',
 		],
 		'nameserver': [
