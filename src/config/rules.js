@@ -42,6 +42,7 @@ export const CUSTOM_RULES = [
       "me.com",
       "akadns.net",
       "aaplimg.com",
+	  "64clouds.com",
       "steampowered.com",
       "sciencedirect.com",
       "patronums.top",
