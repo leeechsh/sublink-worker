@@ -45,6 +45,8 @@ export const CUSTOM_RULES = [
 	  "ieee.org",
 	  "mzstatic.com",
 	  "me.com",
+	  "cnki.net",
+	  "easyscholar.cc",
 	  "akadns.net",
 	  "aaplimg.com",
 	  "64clouds.com",
