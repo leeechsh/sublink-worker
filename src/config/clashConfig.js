@@ -172,6 +172,9 @@ export const CLASH_CONFIG = {
 		    '+.cslee.cc',
 		    '+.metaiot.group',
 			'+.leee.space',
+			'imgcdn.cc.cd',
+			'metaiot.cc.cd',
+			'patronum.cc.cd',
 		    '+.pub.3gppnetwork.org',
 		],
 		'nameserver': [
