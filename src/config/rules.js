@@ -48,7 +48,8 @@ export const CUSTOM_RULES = [
       "patronums.top",
 	  "leee.space",
 	  "cslee.cc",
-      "metaiot.group"
+      "cc.cd",
+	  "metaiot.group"
     ]
     }
 ];
