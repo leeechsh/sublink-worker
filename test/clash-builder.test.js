@@ -116,4 +116,20 @@ ss://YWVzLTEyOC1nY206dGVzdA@example.com:444#US-Node-1
     expect(fallbackGroup).toBeDefined();
     expect(fallbackGroup.proxies[0]).not.toBe('DIRECT');
   });
+
+  it('should include direct node names in normal select groups when groupByCountry is enabled', async () => {
+    const input = `
+ss://YWVzLTEyOC1nY206dGVzdA@example.com:443#HK-Node-1
+ss://YWVzLTEyOC1nY206dGVzdA@example.com:444#US-Node-1
+    `;
+
+    const builder = new ClashConfigBuilder(input, ['Google'], [], null, 'zh-CN', 'test-agent', true);
+    const yamlText = await builder.build();
+    const built = yaml.load(yamlText);
+
+    const googleGroup = (built['proxy-groups'] || []).find(g => g && g.name === t('outboundNames.Google'));
+    expect(googleGroup).toBeDefined();
+    expect(googleGroup.proxies).toContain('HK-Node-1');
+    expect(googleGroup.proxies).toContain('US-Node-1');
+  });
 });
