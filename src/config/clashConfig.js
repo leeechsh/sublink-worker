@@ -46,6 +46,8 @@ export const CLASH_CONFIG = {
 		    'app.yinxiang.com',
 		    'injections.adguard.org',
 		    'localhost.*.weixin.qq.com',
+			'iosapps.itunes.apple.com',
+			'iosapps.*.com',
 		    '*.blzstatic.cn',
 		    '*.cmpassport.com',
 		    'id6.me',
