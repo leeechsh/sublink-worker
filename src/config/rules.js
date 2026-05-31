@@ -185,7 +185,8 @@ export const REJECT_ACTION_RULES = new Set(['Ad Block']);
 
 export const PREDEFINED_RULE_SETS = {
 	minimal: ['Location:CN', 'Private', 'Non-China'],
-	balanced: ['Location:CN', 'Private', 'Non-China', 'Github', 'Google', 'Youtube', 'AI Services', 'Telegram'],
+	balanced: ['Ad Block', 'Private', 'Microsoft', 'Github', 'Google', 'Youtube', 'AI Services', 'Telegram', 'Social Media', 'Streaming'],
+	// balanced: ['Location:CN', 'Private', 'Non-China', 'Github', 'Google', 'Youtube', 'AI Services', 'Telegram'],
 	comprehensive: UNIFIED_RULES.map(rule => rule.name)
 };
 
