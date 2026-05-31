@@ -7,12 +7,9 @@ export const CUSTOM_RULES = [
 	  {
     "name": "Custom-Proxy",
     "domain_suffix": [
-      "ocsp.apple.com",
       "digicert.com",
       "entrust.net",
       "ocsp.verisign.net",
-      "apps.apple.com",
-      "itunes.apple.com",
       "blobstore.apple.com",
       "huggingface.co",
       "discord.gg",
