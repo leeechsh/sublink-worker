@@ -181,30 +181,28 @@ export const CLASH_CONFIG = {
 		],
 		// 1. Bootstrap DNS：用于解析 DoH 服务器本身的域名（必须是 IP 或能直接到达的）
 		'default-nameserver': [
-			'119.29.29.29',
-			'223.5.5.5'
+			'223.5.5.5',
+			'119.29.29.29'
 		],
 		// 2. 全局默认 DNS 换成国外，并加上 #RULES 强制走代理（分流规则），由于 1.1.1.1 不匹配任何规则，会走到 MATCH，从而让远程节点服务器进行 DNS 解析
 		'nameserver': [
-			'https://1.1.1.1/dns-query#RULES',
-			'https://8.8.8.8/dns-query#RULES'
+			'https://223.5.5.5/dns-query',
+			'https://120.53.53.53/dns-query'
 		],
 		//3. 明确国内域名、apple，走阿里/腾讯
 		'nameserver-policy': {
-			'geosite:cn,private,apple': [
-				'https://doh.pub/dns-query',
-				'https://dns.alidns.com/dns-query'
-			]
+			'geosite:cn,private,apple': '223.5.5.5',
+			'geosite:geolocation-!cn': 'https://cloudflare-dns.com/dns-query'
 		},
 		// 专门用于解析代理节点域名，避免鸡蛋问题
 		'proxy-server-nameserver': [
-			'119.29.29.29',
-			'223.5.5.5'
+			'223.5.5.5',
+			'119.29.29.29'
 		],
 		// 解析到最后发现是直连则走此 DNS
 		'direct-nameserver': [
-			'https://doh.pub/dns-query',
-			'https://dns.alidns.com/dns-query'
+			'223.5.5.5',
+			'119.29.29.29'
 		],
 		// 在 direct- nameserver 存在时，依然以 nameserver- policy 优先
 		'direct-nameserver-follow-policy': true
