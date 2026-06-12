@@ -176,6 +176,7 @@ export const CLASH_CONFIG = {
 			'+.leee.space',
 			'imgcdn.cc.cd',
 			'metaiot.cc.cd',
+			'wujigg.com',
 			'patronum.cc.cd',
 		    '+.pub.3gppnetwork.org',
 		],
