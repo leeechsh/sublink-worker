@@ -34,6 +34,7 @@ export const CUSTOM_RULES = [
     "name": "Custom-DIRECT",
     "domain_suffix": [
 	  "patronums.top",
+	  "wujigg.com",
 	  "leee.space",
 	  "cslee.cc",
 	  "cc.cd",
