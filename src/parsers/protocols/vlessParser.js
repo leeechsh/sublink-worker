@@ -6,7 +6,14 @@ export function parseVless(url) {
     const { host, port } = parseServerInfo(serverInfo);
 
     const tls = createTlsConfig(params);
-    if (tls.reality) {
+    // Honor explicit fp query param (e.g. fp=chrome) for client fingerprint.
+    // If not provided, preserve previous behavior: enable utls for reality with default 'chrome'.
+    if (params.fp) {
+        tls.utls = {
+            enabled: true,
+            fingerprint: params.fp
+        };
+    } else if (tls.reality) {
         tls.utls = {
             enabled: true,
             fingerprint: 'chrome'
