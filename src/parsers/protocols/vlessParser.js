@@ -1,4 +1,4 @@
-import { parseServerInfo, parseUrlParams, createTlsConfig, createTransportConfig, parseBool } from '../../utils.js';
+import { parseServerInfo, parseUrlParams, createTlsConfig, createTransportConfig, parseBool, parseArray } from '../../utils.js';
 
 export function parseVless(url) {
     const { addressPart, params, name } = parseUrlParams(url);
@@ -20,6 +20,7 @@ export function parseVless(url) {
         };
     }
     const transport = params.type !== 'tcp' ? createTransportConfig(params) : undefined;
+    const alpn = parseArray(params.alpn);
 
     // `udp` is a Clash-only flag; ClashConfigBuilder reads it, SingboxConfigBuilder strips it.
     const udp = params.udp !== undefined ? parseBool(params.udp) : undefined;
@@ -34,6 +35,7 @@ export function parseVless(url) {
         tls,
         transport,
         flow: params.flow ?? undefined,
+        ...(alpn ? { alpn } : {}),
         ...(udp !== undefined ? { udp } : {})
     };
 }
