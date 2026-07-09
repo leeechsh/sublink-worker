@@ -1,4 +1,4 @@
-const CUSTOM_RULES_REPO_BASE = 'https://raw.githubusercontent.com/leeechsh/meta-custom-rules-dat';
+const CUSTOM_RULES_REPO_BASE = 'https://gh-proxy.org/https://github.com/leeechsh/meta-custom-rules-dat/raw/refs/heads';
 
 export const CUSTOM_REMOTE_SITE_RULE_SOURCES = {
     'custom-proxy': {
