@@ -6,7 +6,7 @@
 import { createTranslator } from '../i18n/index.js';
 import { generateRules } from './ruleGenerators.js';
 import { COUNTRY_DATA } from '../utils.js';
-import { DIRECT_DEFAULT_RULES } from './rules.js';
+import { DIRECT_DEFAULT_RULES, DIRECT_ONLY_RULES } from './rules.js';
 
 // Rule names that should default to REJECT
 const REJECT_RULES = new Set(['Ad Block']);
@@ -166,6 +166,8 @@ export function generateSubconverterConfig({ selectedRules = [], customRules = [
 
 		if (REJECT_RULES.has(rule.outbound)) {
 			lines.push(`custom_proxy_group=${groupName}\`select\`[]REJECT\`[]DIRECT`);
+		} else if (DIRECT_ONLY_RULES.has(rule.outbound)) {
+			lines.push(`custom_proxy_group=${groupName}\`select\`[]DIRECT`);
 		} else if (DIRECT_DEFAULT_RULES.has(rule.outbound)) {
 			lines.push(`custom_proxy_group=${groupName}\`select\`[]DIRECT\`[]${nodeSelectName}`);
 		} else {

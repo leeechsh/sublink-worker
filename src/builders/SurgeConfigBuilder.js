@@ -1,6 +1,7 @@
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { groupProxiesByCountry } from '../utils.js';
-import { SURGE_CONFIG, SURGE_SITE_RULE_SET_BASEURL, SURGE_IP_RULE_SET_BASEURL, generateRules, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES } from '../config/index.js';
+import { SURGE_CONFIG, SURGE_SITE_RULE_SET_BASEURL, SURGE_IP_RULE_SET_BASEURL, generateRules, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES, DIRECT_ONLY_RULES } from '../config/index.js';
+import { getCustomSiteRuleSource } from '../config/customRemoteRuleSources.js';
 import { addProxyWithDedup } from './helpers/proxyHelpers.js';
 import { buildSelectorMembers, buildNodeSelectMembers, buildCustomRuleMembers, uniqueNames } from './helpers/groupBuilder.js';
 
@@ -282,8 +283,11 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
                 if (this.hasProxyGroup(name)) {
                     return;
                 }
+                if (DIRECT_ONLY_RULES.has(outbound)) {
+                    options = ['DIRECT'];
+                }
                 // For rules that should default to DIRECT, move DIRECT to the front
-                if (DIRECT_DEFAULT_RULES.has(outbound)) {
+                if (!DIRECT_ONLY_RULES.has(outbound) && DIRECT_DEFAULT_RULES.has(outbound)) {
                     options = ['DIRECT', ...options.filter(p => p !== 'DIRECT')];
                 }
                 this.config['proxy-groups'].push(
@@ -453,7 +457,9 @@ export class SurgeConfigBuilder extends BaseConfigBuilder {
 
         rules.filter(rule => rule.site_rules[0] !== '').map(rule => {
             rule.site_rules.forEach(site => {
-                finalConfig.push(`RULE-SET,${SURGE_SITE_RULE_SET_BASEURL}${site}.conf,${this.t('outboundNames.' + rule.outbound)}`);
+                const customSource = getCustomSiteRuleSource(site);
+                const ruleSetUrl = customSource?.surge || `${SURGE_SITE_RULE_SET_BASEURL}${site}.conf`;
+                finalConfig.push(`RULE-SET,${ruleSetUrl},${this.t('outboundNames.' + rule.outbound)}`);
             });
         });
 

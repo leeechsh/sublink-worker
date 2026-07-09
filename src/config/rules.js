@@ -3,91 +3,7 @@
  * Contains unified rule structure and predefined rule sets
  */
 
-export const CUSTOM_RULES = [
-	  {
-    "name": "Custom-Proxy",
-    "domain_suffix": [
-      "digicert.com",
-      "entrust.net",
-      "ocsp.verisign.net",
-      "blobstore.apple.com",
-      "huggingface.co",
-      "discord.gg",
-      "hf.space",
-      "reddit.com",
-      "steamcommunity.com",
-      "linux.do",
-      "imgurl.org",
-      "wandb.ai",
-      "access-point.cloudmessaging.edge.microsoft.com",
-      "sydney.bing.com",
-      "browser.pipe.aria.microsoft.com",
-      "designer.microsoft.com",
-      "edge.microsoft.com",
-      "copilot.microsoft.com",
-      "edgeservices.bing.com",
-      "functional.events.data.microsoft.com",
-      "www.bingapis.com"
-    ]
-    },
-    {
-    "name": "Custom-DIRECT",
-    "domain_suffix": [
-	  "tailfb64b.ts.net",
-	  "tailscale.com",
-	  "patronums.top",
-	  "wujigg.com",
-	  "leee.space",
-	  "cslee.cc",
-	  "cc.cd",
-      "metaiot.group",
-	  "acm.org",
-	  "ieee.org",
-	  "mzstatic.com",
-	  "me.com",
-	  "cnki.net",
-	  "easyscholar.cc",
-	  "akadns.net",
-	  "aaplimg.com",
-	  "64clouds.com",
-	  "steampowered.com",
-	  "sciencedirect.com",
-	  "webofscience.com",
-	  "webofknowledge.com",
-	  "clarivate.com",
-	  "scopus.com",
-	  "elsevier.com",
-	  "els-cdn.com",
-	  "api.elsevier.com",
-	  "doi.org",
-	  "nature.com",
-	  "springer.com",
-	  "link.springer.com",
-	  "wiley.com",
-	  "onlinelibrary.wiley.com",
-	  "tandfonline.com",
-	  "jstor.org",
-	  "ieeexplore.ieee.org",
-	  "dl.acm.org",
-	  "pubs.acs.org",
-	  "cell.com",
-	  "elifesciences.org",
-	  "royalsocietypublishing.org",
-	  "cambridge.org",
-	  "oup.com",
-	  "academic.oup.com",
-	  "sagepub.com",
-	  "ingentaconnect.com",
-	  "projecteuclid.org",
-	  "zenodo.org",
-	  "researchgate.net",
-	  "academic.microsoft.com",
-	  "dimensions.ai",
-	  "ncbi.nlm.nih.gov",
-	  "pubmed.ncbi.nlm.nih.gov"
-    ]
-    }
-];
+export const CUSTOM_RULES = [];
 
 export const UNIFIED_RULES = [
 	{
@@ -98,6 +14,16 @@ export const UNIFIED_RULES = [
 	{
 		name: 'AI Services',
 		site_rules: ['category-ai-!cn',],
+		ip_rules: []
+	},
+	{
+		name: 'Custom Proxy',
+		site_rules: ['custom-proxy'],
+		ip_rules: []
+	},
+	{
+		name: 'Custom Direct',
+		site_rules: ['custom-direct'],
 		ip_rules: []
 	},
 	{
@@ -184,11 +110,12 @@ export const UNIFIED_RULES = [
 
 // Rule names that should default to DIRECT instead of Node Select
 export const DIRECT_DEFAULT_RULES = new Set(['Private', 'Location:CN']);
+export const DIRECT_ONLY_RULES = new Set(['Custom Direct']);
 export const REJECT_ACTION_RULES = new Set(['Ad Block']);
 
 export const PREDEFINED_RULE_SETS = {
-	minimal: ['Location:CN', 'Private', 'Non-China'],
-	balanced: ['Location:CN', 'Private', 'Microsoft', 'Github', 'Google', 'Non-China', 'Youtube', 'AI Services', 'Telegram', 'Social Media', 'Streaming'],
+	minimal: ['Location:CN', 'Private', 'Custom Direct', 'Custom Proxy', 'Non-China'],
+	balanced: ['Location:CN', 'Private', 'Custom Direct', 'Custom Proxy', 'Microsoft', 'Github', 'Google', 'Non-China', 'Youtube', 'AI Services', 'Telegram', 'Social Media', 'Streaming'],
 	// balanced: ['Location:CN', 'Private', 'Non-China', 'Github', 'Google', 'Youtube', 'AI Services', 'Telegram'],
 	comprehensive: UNIFIED_RULES.map(rule => rule.name)
 };

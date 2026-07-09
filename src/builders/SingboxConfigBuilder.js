@@ -1,5 +1,5 @@
 
-import { SING_BOX_CONFIG, generateRuleSets, generateRules, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES, REJECT_ACTION_RULES } from '../config/index.js';
+import { SING_BOX_CONFIG, generateRuleSets, generateRules, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES, DIRECT_ONLY_RULES, REJECT_ACTION_RULES } from '../config/index.js';
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { deepCopy, groupProxiesByCountry } from '../utils.js';
 import { addProxyWithDedup } from './helpers/proxyHelpers.js';
@@ -223,8 +223,11 @@ export class SingboxConfigBuilder extends BaseConfigBuilder {
                 if (this.hasOutboundTag(tag)) {
                     return;
                 }
+                if (DIRECT_ONLY_RULES.has(outbound)) {
+                    selectorMembers = ['DIRECT'];
+                }
                 // For rules that should default to DIRECT, move DIRECT to the front
-                if (DIRECT_DEFAULT_RULES.has(outbound)) {
+                if (!DIRECT_ONLY_RULES.has(outbound) && DIRECT_DEFAULT_RULES.has(outbound)) {
                     selectorMembers = ['DIRECT', ...selectorMembers.filter(p => p !== 'DIRECT')];
                 }
                 this.config.outbounds.push({

@@ -5,6 +5,7 @@
 
 import { UNIFIED_RULES, PREDEFINED_RULE_SETS, SITE_RULE_SETS, IP_RULE_SETS, CLASH_SITE_RULE_SETS, CLASH_IP_RULE_SETS } from './rules.js';
 import { SITE_RULE_SET_BASE_URL, IP_RULE_SET_BASE_URL, CLASH_SITE_RULE_SET_BASE_URL, CLASH_IP_RULE_SET_BASE_URL } from './ruleUrls.js';
+import { getCustomSiteRuleSource } from './customRemoteRuleSources.js';
 
 function toStringArray(value) {
 	if (Array.isArray(value)) {
@@ -16,6 +17,29 @@ function toStringArray(value) {
 		return value.split(',').map(x => x.trim()).filter(Boolean);
 	}
 	return [];
+}
+
+function getSingboxSiteRuleUrl(rule) {
+	const customSource = getCustomSiteRuleSource(rule);
+	if (customSource?.singbox) {
+		return customSource.singbox;
+	}
+	return `${SITE_RULE_SET_BASE_URL}${SITE_RULE_SETS[rule]}`;
+}
+
+function getClashSiteRuleProvider(rule, useMrs) {
+	const customSource = getCustomSiteRuleSource(rule);
+	const format = useMrs ? 'mrs' : 'yaml';
+	const ext = useMrs ? '.mrs' : '.yaml';
+	const customUrl = useMrs ? customSource?.clash?.mrs : customSource?.clash?.yaml;
+	return {
+		type: 'http',
+		format,
+		behavior: 'domain',
+		url: customUrl || `${CLASH_SITE_RULE_SET_BASE_URL}${rule}${ext}`,
+		path: `./ruleset/${rule}${ext}`,
+		interval: 86400
+	};
 }
 
 // Helper function to get outbounds based on selected rule names
@@ -96,7 +120,7 @@ export function generateRuleSets(selectedRules = [], customRules = []) {
 		tag: rule,
 		type: 'remote',
 		format: 'binary',
-		url: `${SITE_RULE_SET_BASE_URL}${SITE_RULE_SETS[rule]}`,
+		url: getSingboxSiteRuleUrl(rule),
 	}));
 
 	const ip_rule_sets = Array.from(ipRuleSets).map(rule => ({
@@ -122,7 +146,7 @@ export function generateRuleSets(selectedRules = [], customRules = []) {
 					tag: site,
 					type: 'remote',
 					format: 'binary',
-					url: `${SITE_RULE_SET_BASE_URL}${site}.srs`,
+					url: getSingboxSiteRuleUrl(site),
 				});
 			});
 			toStringArray(rule.ip).forEach(ip => {
@@ -171,14 +195,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 	const ip_rule_providers = {};
 
 	Array.from(siteRuleSets).forEach(rule => {
-		site_rule_providers[rule] = {
-			type: 'http',
-			format: format,
-			behavior: 'domain',
-			url: `${CLASH_SITE_RULE_SET_BASE_URL}${rule}${ext}`,
-			path: `./ruleset/${rule}${ext}`,
-			interval: 86400
-		};
+		site_rule_providers[rule] = getClashSiteRuleProvider(rule, useMrs);
 	});
 
 	Array.from(ipRuleSets).forEach(rule => {
@@ -208,14 +225,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 	if (customRules) {
 		customRules.forEach(rule => {
 			toStringArray(rule.site).forEach(site => {
-				site_rule_providers[site] = {
-					type: 'http',
-					format: format,
-					behavior: 'domain',
-					url: `${CLASH_SITE_RULE_SET_BASE_URL}${site}${ext}`,
-					path: `./ruleset/${site}${ext}`,
-					interval: 86400
-				};
+				site_rule_providers[site] = getClashSiteRuleProvider(site, useMrs);
 			});
 			toStringArray(rule.ip).forEach(ip => {
 				ip_rule_providers[`${ip}-ip`] = {

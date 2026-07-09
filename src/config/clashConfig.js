@@ -209,12 +209,6 @@ export const CLASH_CONFIG = {
 		'direct-nameserver-follow-policy': true
 
 	},
-	'proxies': [],
-	'proxy-groups': [
-		{
-		"name": "Custom-DIRECT",
-		"type": "select",
-		"proxies": ["DIRECT"]
-	}
-	]
-};
+		'proxies': [],
+		'proxy-groups': []
+	};

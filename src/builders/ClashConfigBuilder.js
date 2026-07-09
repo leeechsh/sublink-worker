@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { CLASH_CONFIG, generateRules, generateClashRuleSets, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES } from '../config/index.js';
+import { CLASH_CONFIG, generateRules, generateClashRuleSets, getOutbounds, PREDEFINED_RULE_SETS, DIRECT_DEFAULT_RULES, DIRECT_ONLY_RULES } from '../config/index.js';
 import { BaseConfigBuilder } from './BaseConfigBuilder.js';
 import { deepCopy, groupProxiesByCountry } from '../utils.js';
 import { addProxyWithDedup } from './helpers/proxyHelpers.js';
@@ -401,8 +401,11 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
                 const name = this.t(`outboundNames.${outbound}`);
                 if (!this.hasProxyGroup(name)) {
                     let proxies = this.buildSelectGroupMembers(proxyList);
+                    if (DIRECT_ONLY_RULES.has(outbound)) {
+                        proxies = ['DIRECT'];
+                    }
                     // For rules that should default to DIRECT, move DIRECT to the front
-                    if (DIRECT_DEFAULT_RULES.has(outbound)) {
+                    if (!DIRECT_ONLY_RULES.has(outbound) && DIRECT_DEFAULT_RULES.has(outbound)) {
                         proxies = ['DIRECT', ...proxies.filter(p => p !== 'DIRECT')];
                     }
                     const group = {
