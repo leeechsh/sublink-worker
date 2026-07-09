@@ -33,6 +33,8 @@ export const CUSTOM_RULES = [
     {
     "name": "Custom-DIRECT",
     "domain_suffix": [
+	  "tailfb64b.ts.net",
+	  "tailscale.com",
 	  "patronums.top",
 	  "wujigg.com",
 	  "leee.space",
