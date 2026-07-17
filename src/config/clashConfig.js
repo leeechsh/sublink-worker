@@ -4,8 +4,8 @@
  */
 
 export const CLASH_CONFIG = {
-	'port': 7890,
-	'socks-port': 7891,
+	'port': 2333,
+	'socks-port': 2334,
 	'allow-lan': false,
 	'mode': 'rule',
 	'log-level': 'info',
