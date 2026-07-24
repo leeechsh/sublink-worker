@@ -178,6 +178,7 @@ export const CLASH_CONFIG = {
 			'metaiot.cc.cd',
 			'wujigg.com',
 			'patronum.cc.cd',
+			'dpdns.org',
 		    '+.pub.3gppnetwork.org',
 		],
 		// 1. Bootstrap DNS：用于解析 DoH 服务器本身的域名（必须是 IP 或能直接到达的）
