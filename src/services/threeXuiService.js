@@ -11,7 +11,7 @@ export class ThreeXuiError extends Error {
 }
 
 export function createThreeXuiService(options = {}) {
-    const baseUrl = String(options.baseUrl || '').replace(/\/$/, '');
+    const baseUrl = String(options.baseUrl || '').trim().replace(/\/$/, '');
     const apiToken = String(options.apiToken || '').trim();
     const timeoutMs = positiveNumber(options.timeoutMs, 3000);
     const concurrency = positiveNumber(options.concurrency, 5);
