@@ -459,7 +459,7 @@ export function createApp(bindings = {}) {
 }
 
 export function parseSelectedRules(raw) {
-    if (!raw) return [];
+    if (!raw) return PREDEFINED_RULE_SETS.balanced;
 
     // 首先检查是否是预设名称 (minimal, balanced, comprehensive)
     // 这确保向后兼容主分支的 API 行为
@@ -470,11 +470,10 @@ export function parseSelectedRules(raw) {
     // 尝试解析为 JSON 数组
     try {
         const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed) ? parsed : PREDEFINED_RULE_SETS.balanced;
     } catch {
-        // 解析失败，回退到 minimal 预设
-        console.warn(`Failed to parse selectedRules: ${raw}, falling back to minimal`);
-        return PREDEFINED_RULE_SETS.minimal;
+        console.warn(`Failed to parse selectedRules: ${raw}, falling back to balanced`);
+        return PREDEFINED_RULE_SETS.balanced;
     }
 }
 

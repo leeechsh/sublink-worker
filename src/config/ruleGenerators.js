@@ -67,7 +67,7 @@ export function generateRules(selectedRules = [], customRules = []) {
 	}
 
 	if (!selectedRules || selectedRules.length === 0) {
-		selectedRules = PREDEFINED_RULE_SETS.minimal;
+		selectedRules = PREDEFINED_RULE_SETS.balanced;
 	}
 
 	const rules = [];
@@ -107,7 +107,7 @@ export function generateRuleSets(selectedRules = [], customRules = []) {
 	}
 
 	if (!selectedRules || selectedRules.length === 0) {
-		selectedRules = PREDEFINED_RULE_SETS.minimal;
+		selectedRules = PREDEFINED_RULE_SETS.balanced;
 	}
 
 	const selectedRulesSet = new Set(selectedRules);
@@ -155,7 +155,7 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 	}
 
 	if (!selectedRules || selectedRules.length === 0) {
-		selectedRules = PREDEFINED_RULE_SETS.minimal;
+		selectedRules = PREDEFINED_RULE_SETS.balanced;
 	}
 
 	// Determine format based on client compatibility

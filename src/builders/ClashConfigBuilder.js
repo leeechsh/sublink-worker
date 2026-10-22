@@ -458,7 +458,8 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
     addFallBackGroup(proxyList) {
         const name = this.t('outboundNames.Fall Back');
         if (this.hasProxyGroup(name)) return;
-        const proxies = this.buildSelectGroupMembers(proxyList);
+        const selectableProxies = this.buildSelectGroupMembers(proxyList);
+        const proxies = ['DIRECT', ...selectableProxies.filter(proxy => proxy !== 'DIRECT')];
         const group = {
             type: "select",
             name,

@@ -110,11 +110,11 @@ ss://YWVzLTEyOC1nY206dGVzdA@example.com:444#US-Node-1
     expect(privateGroup.proxies[0]).toBe('DIRECT');
     expect(cnGroup.proxies[0]).toBe('DIRECT');
 
-    // Other groups should NOT default to DIRECT
+    // Unmatched traffic should also default to DIRECT.
     const fallbackName = t('outboundNames.Fall Back');
     const fallbackGroup = (built['proxy-groups'] || []).find(g => g && g.name === fallbackName);
     expect(fallbackGroup).toBeDefined();
-    expect(fallbackGroup.proxies[0]).not.toBe('DIRECT');
+    expect(fallbackGroup.proxies[0]).toBe('DIRECT');
   });
 
   it('should include direct node names in normal select groups when groupByCountry is enabled', async () => {

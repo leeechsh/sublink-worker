@@ -34,34 +34,34 @@ describe('selectedRules backward compatibility', () => {
         expect(result).toEqual(['Google', 'Youtube', 'Github']);
     });
 
-    it('should return empty array for empty string', () => {
+    it('should default to balanced for empty string', () => {
         const result = parseSelectedRules('');
-        expect(result).toEqual([]);
+        expect(result).toEqual(PREDEFINED_RULE_SETS.balanced);
     });
 
-    it('should return empty array for undefined', () => {
+    it('should default to balanced for undefined', () => {
         const result = parseSelectedRules(undefined);
-        expect(result).toEqual([]);
+        expect(result).toEqual(PREDEFINED_RULE_SETS.balanced);
     });
 
-    it('should return empty array for null', () => {
+    it('should default to balanced for null', () => {
         const result = parseSelectedRules(null);
-        expect(result).toEqual([]);
+        expect(result).toEqual(PREDEFINED_RULE_SETS.balanced);
     });
 
-    it('should fallback to minimal for invalid JSON', () => {
+    it('should fallback to balanced for invalid JSON', () => {
         const result = parseSelectedRules('invalid-json-{[');
-        expect(result).toEqual(PREDEFINED_RULE_SETS.minimal);
+        expect(result).toEqual(PREDEFINED_RULE_SETS.balanced);
     });
 
-    it('should fallback to minimal for unknown preset name', () => {
+    it('should fallback to balanced for unknown preset name', () => {
         const result = parseSelectedRules('unknown-preset');
-        expect(result).toEqual(PREDEFINED_RULE_SETS.minimal);
+        expect(result).toEqual(PREDEFINED_RULE_SETS.balanced);
     });
 
-    it('should return empty array if JSON is not an array', () => {
+    it('should fallback to balanced if JSON is not an array', () => {
         const jsonObject = JSON.stringify({ rule: 'value' });
         const result = parseSelectedRules(jsonObject);
-        expect(result).toEqual([]);
+        expect(result).toEqual(PREDEFINED_RULE_SETS.balanced);
     });
 });
