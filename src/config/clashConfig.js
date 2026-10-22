@@ -193,7 +193,7 @@ export const CLASH_CONFIG = {
 		],
 		//3. 明确国内域名、apple，走阿里/腾讯
 		'nameserver-policy': {
-			'geosite:cn,private,apple': '223.5.5.5',
+			'geosite:cn,private,apple,microsoft': '223.5.5.5',
 			'geosite:geolocation-!cn': 'https://cloudflare-dns.com/dns-query'
 		},
 		// 专门用于解析代理节点域名，避免鸡蛋问题
