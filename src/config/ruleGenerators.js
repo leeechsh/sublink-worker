@@ -3,7 +3,7 @@
  * Functions for generating rules and rule sets
  */
 
-import { UNIFIED_RULES, PREDEFINED_RULE_SETS, SITE_RULE_SETS, IP_RULE_SETS, CLASH_SITE_RULE_SETS, CLASH_IP_RULE_SETS } from './rules.js';
+import { UNIFIED_RULES, PREDEFINED_RULE_SETS } from './rules.js';
 import { SITE_RULE_SET_BASE_URL, IP_RULE_SET_BASE_URL, CLASH_SITE_RULE_SET_BASE_URL, CLASH_IP_RULE_SET_BASE_URL } from './ruleUrls.js';
 import { getCustomSiteRuleSource } from './customRemoteRuleSources.js';
 
@@ -19,12 +19,20 @@ function toStringArray(value) {
 	return [];
 }
 
+// Rule identifiers are interpolated into rule-set download URLs (e.g. `${BASE}${site}.srs`).
+// To prevent SSRF / URL-injection (CWE-918) via user-supplied customRules, restrict
+// site/ip identifiers to a conservative charset matching upstream rule-set filenames:
+// letters, digits, hyphen, underscore, dot. We also reject `..` sequences and any
+// leading dot to prevent path traversal within the base URL path.
+const SAFE_RULE_ID_RE = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*$/;
+
+function sanitizeRuleIds(values) {
+	return toStringArray(values).filter(v => SAFE_RULE_ID_RE.test(v) && !v.includes('..'));
+}
+
 function getSingboxSiteRuleUrl(rule) {
 	const customSource = getCustomSiteRuleSource(rule);
-	if (customSource?.singbox) {
-		return customSource.singbox;
-	}
-	return `${SITE_RULE_SET_BASE_URL}${SITE_RULE_SETS[rule]}`;
+	return customSource?.singbox || `${SITE_RULE_SET_BASE_URL}${rule}.srs`;
 }
 
 function getClashSiteRuleProvider(rule, useMrs) {
@@ -79,8 +87,8 @@ export function generateRules(selectedRules = [], customRules = []) {
 	customRules.reverse();
 	customRules.forEach((rule) => {
 		rules.unshift({
-			site_rules: toStringArray(rule.site),
-			ip_rules: toStringArray(rule.ip),
+			site_rules: sanitizeRuleIds(rule.site),
+			ip_rules: sanitizeRuleIds(rule.ip),
 			domain_suffix: toStringArray(rule.domain_suffix),
 			domain_keyword: toStringArray(rule.domain_keyword),
 			ip_cidr: toStringArray(rule.ip_cidr),
@@ -107,14 +115,22 @@ export function generateRuleSets(selectedRules = [], customRules = []) {
 	const siteRuleSets = new Set();
 	const ipRuleSets = new Set();
 
-	const ruleSets = [];
-
 	UNIFIED_RULES.forEach(rule => {
 		if (selectedRulesSet.has(rule.name)) {
 			rule.site_rules.forEach(siteRule => siteRuleSets.add(siteRule));
 			rule.ip_rules.forEach(ipRule => ipRuleSets.add(ipRule));
 		}
 	});
+
+	// DNS rules require these sets even when their routing rules are not selected.
+	['geolocation-cn', 'cn', 'geolocation-!cn'].forEach(rule => siteRuleSets.add(rule));
+
+	if (customRules) {
+		customRules.forEach(rule => {
+			sanitizeRuleIds(rule.site).forEach(site => siteRuleSets.add(site));
+			sanitizeRuleIds(rule.ip).forEach(ip => ipRuleSets.add(ip));
+		});
+	}
 
 	const site_rule_sets = Array.from(siteRuleSets).map(rule => ({
 		tag: rule,
@@ -127,41 +143,8 @@ export function generateRuleSets(selectedRules = [], customRules = []) {
 		tag: `${rule}-ip`,
 		type: 'remote',
 		format: 'binary',
-		url: `${IP_RULE_SET_BASE_URL}${IP_RULE_SETS[rule]}`,
+		url: `${IP_RULE_SET_BASE_URL}${rule}.srs`,
 	}));
-
-	if (!selectedRules.includes('Non-China')) {
-		site_rule_sets.push({
-			tag: 'geolocation-!cn',
-			type: 'remote',
-			format: 'binary',
-			url: `${SITE_RULE_SET_BASE_URL}geolocation-!cn.srs`,
-		});
-	}
-
-	if (customRules) {
-		customRules.forEach(rule => {
-			toStringArray(rule.site).forEach(site => {
-				site_rule_sets.push({
-					tag: site,
-					type: 'remote',
-					format: 'binary',
-					url: getSingboxSiteRuleUrl(site),
-				});
-			});
-			toStringArray(rule.ip).forEach(ip => {
-				ip_rule_sets.push({
-					tag: `${ip}-ip`,
-					type: 'remote',
-					format: 'binary',
-					url: `${IP_RULE_SET_BASE_URL}${ip}.srs`,
-				});
-			});
-		});
-	}
-
-	ruleSets.push(...site_rule_sets, ...ip_rule_sets);
-
 	return { site_rule_sets, ip_rule_sets };
 }
 
@@ -224,10 +207,10 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 	// Add custom rules
 	if (customRules) {
 		customRules.forEach(rule => {
-			toStringArray(rule.site).forEach(site => {
+			sanitizeRuleIds(rule.site).forEach(site => {
 				site_rule_providers[site] = getClashSiteRuleProvider(site, useMrs);
 			});
-			toStringArray(rule.ip).forEach(ip => {
+			sanitizeRuleIds(rule.ip).forEach(ip => {
 				ip_rule_providers[`${ip}-ip`] = {
 					type: 'http',
 					format: format,

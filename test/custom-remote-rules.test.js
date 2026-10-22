@@ -33,6 +33,24 @@ describe('custom remote rules', () => {
         expect(yamlProviders.site_rule_providers['custom-direct']?.url).toBe('https://gh-proxy.org/https://github.com/leeechsh/meta-custom-rules-dat/raw/refs/heads/meta/geosite/custom-direct.yaml');
     });
 
+    it('keeps custom sources while rejecting unsafe custom rule identifiers', () => {
+        const customRules = [{
+            site: ['custom-proxy', '../cn', 'https://evil.example/rule'],
+            ip: ['safe-net', '../private']
+        }];
+
+        const singbox = generateRuleSets(['Private'], customRules);
+        const customProxy = singbox.site_rule_sets.find(rule => rule.tag === 'custom-proxy');
+        expect(customProxy?.url).toBe('https://gh-proxy.org/https://github.com/leeechsh/meta-custom-rules-dat/raw/refs/heads/sing/geosite/custom-proxy.srs');
+        expect(singbox.site_rule_sets.map(rule => rule.tag)).not.toContain('../cn');
+        expect(singbox.ip_rule_sets.map(rule => rule.tag)).not.toContain('../private-ip');
+
+        const clash = generateClashRuleSets(['Private'], customRules, true);
+        expect(clash.site_rule_providers['custom-proxy']?.url).toBe('https://gh-proxy.org/https://github.com/leeechsh/meta-custom-rules-dat/raw/refs/heads/meta/geosite/custom-proxy.mrs');
+        expect(clash.site_rule_providers).not.toHaveProperty('../cn');
+        expect(clash.ip_rule_providers).not.toHaveProperty('../private-ip');
+    });
+
     it('keeps Custom Direct group as DIRECT only in clash output', async () => {
         const builder = new ClashConfigBuilder(
             'ss://YWVzLTEyOC1nY206dGVzdA@example.com:443#HK-Node-1',
