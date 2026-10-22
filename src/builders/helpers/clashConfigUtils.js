@@ -3,8 +3,19 @@ export function emitClashRules(rules = [], translator) {
         throw new Error('emitClashRules requires a translator function');
     }
     const results = [];
+    const privateRules = rules.filter(rule => rule.outbound === 'Private');
+    const remainingRules = rules.filter(rule => rule.outbound !== 'Private');
 
-    rules
+    privateRules.forEach(rule => {
+        (rule.site_rules || []).forEach(site => {
+            results.push(`RULE-SET,${site},${translator('outboundNames.' + rule.outbound)}`);
+        });
+        (rule.ip_rules || []).forEach(ip => {
+            results.push(`RULE-SET,${ip}-ip,${translator('outboundNames.' + rule.outbound)},no-resolve`);
+        });
+    });
+
+    remainingRules
         .filter(rule => Array.isArray(rule.src_ip_cidr) && rule.src_ip_cidr.length > 0)
         .forEach(rule => {
             rule.src_ip_cidr.forEach(cidr => {
@@ -12,7 +23,7 @@ export function emitClashRules(rules = [], translator) {
                 results.push(`SRC-IP-CIDR,${cidr},${translator('outboundNames.' + rule.outbound)}`);
             });
         });
-    rules
+    remainingRules
         .filter(rule => Array.isArray(rule.domain_suffix) && rule.domain_suffix.length > 0)
         .forEach(rule => {
             rule.domain_suffix.forEach(suffix => {
@@ -20,7 +31,7 @@ export function emitClashRules(rules = [], translator) {
             });
         });
 
-    rules
+    remainingRules
         .filter(rule => Array.isArray(rule.domain_keyword) && rule.domain_keyword.length > 0)
         .forEach(rule => {
             rule.domain_keyword.forEach(keyword => {
@@ -28,7 +39,7 @@ export function emitClashRules(rules = [], translator) {
             });
         });
 
-    rules
+    remainingRules
         .filter(rule => Array.isArray(rule.site_rules) && rule.site_rules[0])
         .forEach(rule => {
             rule.site_rules.forEach(site => {
@@ -36,7 +47,7 @@ export function emitClashRules(rules = [], translator) {
             });
         });
 
-    rules
+    remainingRules
         .filter(rule => Array.isArray(rule.ip_rules) && rule.ip_rules[0])
         .forEach(rule => {
             rule.ip_rules.forEach(ip => {
@@ -44,7 +55,7 @@ export function emitClashRules(rules = [], translator) {
             });
         });
 
-    rules
+    remainingRules
         .filter(rule => Array.isArray(rule.ip_cidr) && rule.ip_cidr.length > 0)
         .forEach(rule => {
             rule.ip_cidr.forEach(cidr => {

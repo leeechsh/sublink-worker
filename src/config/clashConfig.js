@@ -3,6 +3,20 @@
  * Base configuration template for Clash client
  */
 
+function buildRealIpRules(patterns) {
+	const rules = patterns.flatMap(pattern => {
+		if (typeof pattern !== 'string' || !pattern || /\s/.test(pattern)) return [];
+		if (pattern.startsWith('+.') || pattern.startsWith('*.')) {
+			return [`DOMAIN-SUFFIX,${pattern.slice(2)},real-ip`];
+		}
+		if (pattern.includes('*')) {
+			return [`DOMAIN-WILDCARD,${pattern},real-ip`];
+		}
+		return [`DOMAIN,${pattern},real-ip`];
+	});
+	return [...new Set(rules)];
+}
+
 export const CLASH_CONFIG = {
 	'port': 2333,
 	'socks-port': 2334,
@@ -25,9 +39,14 @@ export const CLASH_CONFIG = {
 	'dns': {
 		'enable': true,
 		'ipv6': false,
+		'cache-algorithm': 'arc',
 		'respect-rules': true,
 		'enhanced-mode': 'fake-ip',
+		'fake-ip-filter-mode': 'rule',
 		'fake-ip-filter': [
+			'RULE-SET,private,real-ip',
+			'RULE-SET,custom-direct,real-ip',
+			...buildRealIpRules([
 		    '*.lan',
 		    '*.localdomain',
 		    '*.example',
@@ -180,34 +199,42 @@ export const CLASH_CONFIG = {
 			'+.patronum.cc.cd',
 			'+.dpdns.org',
 		    '+.pub.3gppnetwork.org',
+			]),
+			'MATCH,fake-ip'
 		],
 		// 1. Bootstrap DNS：用于解析 DoH 服务器本身的域名（必须是 IP 或能直接到达的）
 		'default-nameserver': [
 			'223.5.5.5',
 			'119.29.29.29'
 		],
-		// 2. 全局默认 DNS 换成国外，并加上 #RULES 强制走代理（分流规则），由于 1.1.1.1 不匹配任何规则，会走到 MATCH，从而让远程节点服务器进行 DNS 解析
+		// 2. 默认使用国内 DoH；境外域名由 nameserver-policy 分流到境外 DoH
 		'nameserver': [
 			'https://223.5.5.5/dns-query',
 			'https://120.53.53.53/dns-query'
 		],
 		//3. 明确国内域名、apple，走阿里/腾讯
 		'nameserver-policy': {
-			'geosite:cn,private,apple,microsoft': '223.5.5.5',
-			'geosite:geolocation-!cn': 'https://cloudflare-dns.com/dns-query'
+			'geosite:cn,private,apple,microsoft': [
+				'https://223.5.5.5/dns-query',
+				'https://120.53.53.53/dns-query'
+			],
+			'geosite:geolocation-!cn': [
+				'https://cloudflare-dns.com/dns-query',
+				'https://dns.google/dns-query'
+			]
 		},
 		// 专门用于解析代理节点域名，避免鸡蛋问题
 		'proxy-server-nameserver': [
-			'223.5.5.5',
-			'119.29.29.29'
+			'https://223.5.5.5/dns-query',
+			'https://120.53.53.53/dns-query'
 		],
 		// 解析到最后发现是直连则走此 DNS
 		'direct-nameserver': [
-			'223.5.5.5',
-			'119.29.29.29'
+			'https://223.5.5.5/dns-query',
+			'https://120.53.53.53/dns-query'
 		],
-		// 在 direct- nameserver 存在时，依然以 nameserver- policy 优先
-		'direct-nameserver-follow-policy': true
+		// 直连出口固定使用 direct-nameserver，避免再次被境外 policy 改写
+		'direct-nameserver-follow-policy': false
 
 	},
 		'proxies': [],

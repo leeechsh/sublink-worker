@@ -7,13 +7,13 @@ export const CUSTOM_RULES = [];
 
 export const UNIFIED_RULES = [
 	{
-		name: 'Ad Block',
-		site_rules: ['category-ads-all'],
-		ip_rules: []
+		name: 'Private',
+		site_rules: ['private'],
+		ip_rules: ['private']
 	},
 	{
-		name: 'AI Services',
-		site_rules: ['category-ai-!cn',],
+		name: 'Custom Direct',
+		site_rules: ['custom-direct'],
 		ip_rules: []
 	},
 	{
@@ -22,8 +22,13 @@ export const UNIFIED_RULES = [
 		ip_rules: []
 	},
 	{
-		name: 'Custom Direct',
-		site_rules: ['custom-direct'],
+		name: 'Ad Block',
+		site_rules: ['category-ads-all'],
+		ip_rules: []
+	},
+	{
+		name: 'AI Services',
+		site_rules: ['category-ai-!cn',],
 		ip_rules: []
 	},
 	{
@@ -40,11 +45,6 @@ export const UNIFIED_RULES = [
 		name: 'Google',
 		site_rules: ['google'],
 		ip_rules: ['google']
-	},
-	{
-		name: 'Private',
-		site_rules: [],
-		ip_rules: ['private']
 	},
 	{
 		name: 'Location:CN',

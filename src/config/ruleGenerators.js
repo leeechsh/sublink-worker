@@ -174,6 +174,9 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 		}
 	});
 
+	// The Clash DNS fake-IP rules always reference these providers.
+	['private', 'custom-direct'].forEach(rule => siteRuleSets.add(rule));
+
 	const site_rule_providers = {};
 	const ip_rule_providers = {};
 

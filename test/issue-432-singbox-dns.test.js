@@ -121,7 +121,7 @@ describe.each(versions)('sing-box $version DNS fallback (issue #432)', ({ versio
         ]);
         const tags = config.route.rule_set.map(ruleSet => ruleSet.tag);
 
-        expect(tags).toEqual(['geolocation-cn', 'cn', 'geolocation-!cn', 'private-ip', 'cn-ip']);
+        expect(tags).toEqual(['private', 'geolocation-cn', 'cn', 'geolocation-!cn', 'private-ip', 'cn-ip']);
         expect(config.route.rules).toContainEqual({
             rule_set: ['geolocation-cn', 'cn'],
             outbound: 'OtherCN'
@@ -258,7 +258,7 @@ describe('sing-box rule-set collection', () => {
             ip: [...unsafeIds, 'safe-net']
         }]);
 
-        expect(site_rule_sets.map(rule => rule.tag)).toEqual(['geolocation-cn', 'cn', 'geolocation-!cn', 'safe-site.example']);
+        expect(site_rule_sets.map(rule => rule.tag)).toEqual(['private', 'geolocation-cn', 'cn', 'geolocation-!cn', 'safe-site.example']);
         expect(ip_rule_sets.map(rule => rule.tag)).toEqual(['private-ip', 'safe-net-ip']);
     });
 });
