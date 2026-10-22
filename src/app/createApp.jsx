@@ -14,6 +14,7 @@ import { encodeBase64, tryDecodeSubscriptionLines } from '../utils.js';
 import { APP_NAME, APP_SUBTITLE } from '../constants.js';
 import { ShortLinkService } from '../services/shortLinkService.js';
 import { ConfigStorageService } from '../services/configStorageService.js';
+import { createThreeXuiService, ThreeXuiError } from '../services/threeXuiService.js';
 import { ServiceError, MissingDependencyError } from '../services/errors.js';
 import { normalizeRuntime } from '../runtime/runtimeConfig.js';
 import { PREDEFINED_RULE_SETS, SING_BOX_CONFIG, SING_BOX_CONFIG_V1_11, generateSubconverterConfig } from '../config/index.js';
@@ -24,7 +25,13 @@ export function createApp(bindings = {}) {
     const runtime = normalizeRuntime(bindings);
     const services = {
         shortLinks: runtime.kv ? new ShortLinkService(runtime.kv, { shortLinkTtlSeconds: runtime.config.shortLinkTtlSeconds }) : null,
-        configStorage: runtime.kv ? new ConfigStorageService(runtime.kv, { configTtlSeconds: runtime.config.configTtlSeconds }) : null
+        configStorage: runtime.kv ? new ConfigStorageService(runtime.kv, { configTtlSeconds: runtime.config.configTtlSeconds }) : null,
+        threeXui: createThreeXuiService({
+            baseUrl: runtime.config.threeXuiBaseUrl,
+            apiToken: runtime.config.threeXuiApiToken,
+            timeoutMs: runtime.config.threeXuiTimeoutMs,
+            concurrency: runtime.config.threeXuiConcurrency
+        })
     };
 
     const app = new Hono();
@@ -124,50 +131,53 @@ export function createApp(bindings = {}) {
         }
     });
 
+    const buildClashResponse = async (c, config) => {
+        const selectedRules = parseSelectedRules(c.req.query('selectedRules'));
+        const customRules = parseJsonArray(c.req.query('customRules'));
+        const ua = c.req.query('ua') || getRequestHeader(c.req, 'User-Agent') || DEFAULT_USER_AGENT;
+        const groupByCountry = parseBooleanFlag(c.req.query('group_by_country'));
+        const includeAutoSelect = c.req.query('include_auto_select') !== 'false';
+        const enableClashUI = parseBooleanFlag(c.req.query('enable_clash_ui'));
+        const externalController = c.req.query('external_controller');
+        const externalUiDownloadUrl = c.req.query('external_ui_download_url');
+        const configId = c.req.query('configId');
+        const lang = c.get('lang');
+
+        let baseConfig;
+        if (configId?.startsWith('clash_')) {
+            const storage = requireConfigStorage(services.configStorage);
+            baseConfig = await storage.getConfigById(configId);
+        }
+
+        const builder = new ClashConfigBuilder(
+            config,
+            selectedRules,
+            customRules,
+            baseConfig,
+            lang,
+            ua,
+            groupByCountry,
+            enableClashUI,
+            externalController,
+            externalUiDownloadUrl,
+            includeAutoSelect
+        );
+        await builder.build();
+        const userinfo = builder.getSubscriptionUserinfo();
+        const headers = { 'Content-Type': 'text/yaml; charset=utf-8' };
+        if (userinfo) {
+            headers['subscription-userinfo'] = userinfo;
+        }
+        return c.text(builder.formatConfig(), 200, headers);
+    };
+
     app.get('/clash', async (c) => {
         try {
             const config = c.req.query('config');
             if (!config) {
                 return c.text('Missing config parameter', 400);
             }
-
-            const selectedRules = parseSelectedRules(c.req.query('selectedRules'));
-            const customRules = parseJsonArray(c.req.query('customRules'));
-            const ua = c.req.query('ua') || getRequestHeader(c.req, 'User-Agent') || DEFAULT_USER_AGENT;
-            const groupByCountry = parseBooleanFlag(c.req.query('group_by_country'));
-            const includeAutoSelect = c.req.query('include_auto_select') !== 'false';
-            const enableClashUI = parseBooleanFlag(c.req.query('enable_clash_ui'));
-            const externalController = c.req.query('external_controller');
-            const externalUiDownloadUrl = c.req.query('external_ui_download_url');
-            const configId = c.req.query('configId');
-            const lang = c.get('lang');
-
-            let baseConfig;
-            if (configId?.startsWith('clash_')) {
-                const storage = requireConfigStorage(services.configStorage);
-                baseConfig = await storage.getConfigById(configId);
-            }
-
-            const builder = new ClashConfigBuilder(
-                config,
-                selectedRules,
-                customRules,
-                baseConfig,
-                lang,
-                ua,
-                groupByCountry,
-                enableClashUI,
-                externalController,
-                externalUiDownloadUrl,
-                includeAutoSelect
-            );
-            await builder.build();
-            const userinfo = builder.getSubscriptionUserinfo();
-            const headers = { 'Content-Type': 'text/yaml; charset=utf-8' };
-            if (userinfo) {
-                headers['subscription-userinfo'] = userinfo;
-            }
-            return c.text(builder.formatConfig(), 200, headers);
+            return await buildClashResponse(c, config);
         } catch (error) {
             return handleError(c, error, runtime.logger);
         }
@@ -348,7 +358,44 @@ export function createApp(bindings = {}) {
 
     app.get('/s/:code', redirectHandler('surge'));
     app.get('/b/:code', redirectHandler('singbox'));
-    app.get('/c/:code', redirectHandler('clash'));
+    app.get('/c/:code', async (c) => {
+        const group = c.req.param('code');
+        if (!services.threeXui) {
+            return redirectHandler('clash')(c);
+        }
+
+        try {
+            const result = await services.threeXui.fetchGroupLinks(group);
+            if (result.status === 'not_found') {
+                return redirectHandler('clash')(c);
+            }
+            if (result.links.length === 0) {
+                return c.text('3x-ui group has no supported links', 404);
+            }
+
+            if (result.failedEmails.length > 0) {
+                runtime.logger.warn(`3x-ui group ${group} returned partial results (${result.failedEmails.length} clients failed)`);
+            }
+            const response = await buildClashResponse(c, result.links.join('\n'));
+            if (result.failedEmails.length === 0) {
+                try {
+                    const cachedParams = new URL(c.req.url).searchParams;
+                    cachedParams.set('config', result.links.join('\n'));
+                    const shortLinks = requireShortLinkService(services.shortLinks);
+                    await shortLinks.createShortLink(`?${cachedParams.toString()}`, group);
+                } catch (error) {
+                    runtime.logger.warn(`Failed to update 3x-ui group cache for ${group}`, error);
+                }
+            }
+            return response;
+        } catch (error) {
+            if (error instanceof ThreeXuiError && error.code === 'unavailable') {
+                return redirectHandler('clash')(c);
+            }
+            runtime.logger.error(`Failed to resolve 3x-ui group ${group}`, error);
+            return c.text('3x-ui group lookup failed', 502);
+        }
+    });
     app.get('/x/:code', redirectHandler('xray'));
 
     app.post('/config', async (c) => {

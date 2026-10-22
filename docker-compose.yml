@@ -10,6 +10,12 @@ services:
       REDIS_KEY_PREFIX: sublink
       # Set to 0 to keep stored configs without automatic expiration.
       CONFIG_TTL_SECONDS: 2592000
+      THREE_X_UI_BASE_URL: https://v.cslee.cc/app
+      THREE_X_UI_API_TOKEN_FILE: /run/secrets/3x-ui-token
+      THREE_X_UI_TIMEOUT_MS: 3000
+      THREE_X_UI_CONCURRENCY: 5
+    volumes:
+      - ../.3x-ui-token:/run/secrets/3x-ui-token:ro
     depends_on:
       - redis
   redis:

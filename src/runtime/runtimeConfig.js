@@ -24,7 +24,9 @@
  */
 
 const DEFAULTS = {
-    configTtlSeconds: 60 * 60 * 24 * 30
+    configTtlSeconds: 60 * 60 * 24 * 30,
+    threeXuiTimeoutMs: 3000,
+    threeXuiConcurrency: 5
 };
 
 /**
@@ -40,7 +42,11 @@ export function normalizeRuntime(runtime = {}) {
         logger: runtime.logger ?? console,
         config: {
             configTtlSeconds: runtime.config?.configTtlSeconds ?? DEFAULTS.configTtlSeconds,
-            shortLinkTtlSeconds: runtime.config?.shortLinkTtlSeconds ?? null
+            shortLinkTtlSeconds: runtime.config?.shortLinkTtlSeconds ?? null,
+            threeXuiBaseUrl: runtime.config?.threeXuiBaseUrl ?? null,
+            threeXuiApiToken: runtime.config?.threeXuiApiToken ?? null,
+            threeXuiTimeoutMs: runtime.config?.threeXuiTimeoutMs ?? DEFAULTS.threeXuiTimeoutMs,
+            threeXuiConcurrency: runtime.config?.threeXuiConcurrency ?? DEFAULTS.threeXuiConcurrency
         }
     };
 }

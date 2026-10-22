@@ -11,7 +11,11 @@ export function createVercelRuntime(env = process.env) {
         logger: console,
         config: {
             configTtlSeconds: undefined,
-            shortLinkTtlSeconds: null
+            shortLinkTtlSeconds: null,
+            threeXuiBaseUrl: env.THREE_X_UI_BASE_URL || null,
+            threeXuiApiToken: env.THREE_X_UI_API_TOKEN || null,
+            threeXuiTimeoutMs: env.THREE_X_UI_TIMEOUT_MS,
+            threeXuiConcurrency: env.THREE_X_UI_CONCURRENCY
         }
     };
 }
