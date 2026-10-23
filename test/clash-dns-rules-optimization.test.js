@@ -6,6 +6,14 @@ import { emitClashRules } from '../src/builders/helpers/clashConfigUtils.js';
 const translate = key => key.replace('outboundNames.', '');
 
 describe('Clash DNS and routing defaults', () => {
+    it('uses the independent mirror for every GEO database', () => {
+        expect(CLASH_CONFIG['geox-url']).toEqual({
+            geoip: 'https://gh.ieee.dpdns.org/MetaCubeX/meta-rules-dat/release/geoip.dat',
+            geosite: 'https://gh.ieee.dpdns.org/MetaCubeX/meta-rules-dat/release/geosite.dat',
+            mmdb: 'https://gh.ieee.dpdns.org/MetaCubeX/meta-rules-dat/release/country.mmdb',
+            asn: 'https://gh.ieee.dpdns.org/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb'
+        });
+    });
     it('uses rule-based fake IP filtering and redundant DoH resolvers', () => {
         const dns = CLASH_CONFIG.dns;
 
@@ -37,11 +45,17 @@ describe('Clash DNS and routing defaults', () => {
             .toBeLessThan(rules.indexOf('RULE-SET,cn-ip,Location:CN,no-resolve'));
     });
 
-    it('uses direct GitHub rule provider URLs', () => {
+    it('uses the independent Cloudflare rule mirror', () => {
         const providers = generateClashRuleSets('minimal').site_rule_providers;
 
-        expect(providers.private.url).toMatch(/^https:\/\/raw\.githubusercontent\.com\//);
+        expect(providers.private.url).toBe('https://gh.ieee.dpdns.org/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs');
+        const all = generateClashRuleSets('balanced');
+        expect([...Object.values(all.site_rule_providers), ...Object.values(all.ip_rule_providers)]
+            .every(provider => provider.url.startsWith('https://gh.ieee.dpdns.org/'))).toBe(true);
         expect(Object.values(providers).every(provider => !provider.url.includes('gh-proxy'))).toBe(true);
+        const legacy = generateClashRuleSets('balanced', [], false);
+        expect(legacy.site_rule_providers.private.url).toBe('https://gh.ieee.dpdns.org/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.yaml');
+        expect(legacy.ip_rule_providers['cn-ip'].url).toBe('https://gh.ieee.dpdns.org/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.yaml');
     });
 
     it('always includes providers referenced by fake IP rules', () => {

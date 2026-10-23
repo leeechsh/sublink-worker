@@ -25,12 +25,12 @@ describe('custom remote rules', () => {
 
     it('uses custom clash remote provider URLs', () => {
         const mrsProviders = generateClashRuleSets(['Custom Proxy', 'Custom Direct'], [], true);
-        expect(mrsProviders.site_rule_providers['custom-proxy']?.url).toBe('https://raw.githubusercontent.com/leeechsh/meta-custom-rules-dat/meta/geosite/custom-proxy.mrs');
-        expect(mrsProviders.site_rule_providers['custom-direct']?.url).toBe('https://raw.githubusercontent.com/leeechsh/meta-custom-rules-dat/meta/geosite/custom-direct.mrs');
+        expect(mrsProviders.site_rule_providers['custom-proxy']?.url).toBe('https://gh.ieee.dpdns.org/leeechsh/meta-custom-rules-dat/meta/geosite/custom-proxy.mrs');
+        expect(mrsProviders.site_rule_providers['custom-direct']?.url).toBe('https://gh.ieee.dpdns.org/leeechsh/meta-custom-rules-dat/meta/geosite/custom-direct.mrs');
 
         const yamlProviders = generateClashRuleSets(['Custom Proxy', 'Custom Direct'], [], false);
-        expect(yamlProviders.site_rule_providers['custom-proxy']?.url).toBe('https://raw.githubusercontent.com/leeechsh/meta-custom-rules-dat/meta/geosite/custom-proxy.yaml');
-        expect(yamlProviders.site_rule_providers['custom-direct']?.url).toBe('https://raw.githubusercontent.com/leeechsh/meta-custom-rules-dat/meta/geosite/custom-direct.yaml');
+        expect(yamlProviders.site_rule_providers['custom-proxy']?.url).toBe('https://gh.ieee.dpdns.org/leeechsh/meta-custom-rules-dat/meta/geosite/custom-proxy.yaml');
+        expect(yamlProviders.site_rule_providers['custom-direct']?.url).toBe('https://gh.ieee.dpdns.org/leeechsh/meta-custom-rules-dat/meta/geosite/custom-direct.yaml');
     });
 
     it('keeps custom sources while rejecting unsafe custom rule identifiers', () => {
@@ -46,7 +46,7 @@ describe('custom remote rules', () => {
         expect(singbox.ip_rule_sets.map(rule => rule.tag)).not.toContain('../private-ip');
 
         const clash = generateClashRuleSets(['Private'], customRules, true);
-        expect(clash.site_rule_providers['custom-proxy']?.url).toBe('https://raw.githubusercontent.com/leeechsh/meta-custom-rules-dat/meta/geosite/custom-proxy.mrs');
+        expect(clash.site_rule_providers['custom-proxy']?.url).toBe('https://gh.ieee.dpdns.org/leeechsh/meta-custom-rules-dat/meta/geosite/custom-proxy.mrs');
         expect(clash.site_rule_providers).not.toHaveProperty('../cn');
         expect(clash.ip_rule_providers).not.toHaveProperty('../private-ip');
     });

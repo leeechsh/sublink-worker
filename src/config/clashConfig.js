@@ -1,3 +1,5 @@
+import { CLASH_RULE_MIRROR_BASE_URL } from './ruleUrls.js';
+
 /**
  * Clash Configuration
  * Base configuration template for Clash client
@@ -28,10 +30,10 @@ export const CLASH_CONFIG = {
 	'geodata-loader': 'standard',
 	'geo-update-interval': 24,
 	'geox-url': {
-		'geoip': "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
-		'geosite': "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
-		'mmdb': "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb",
-		'asn': "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+		'geoip': `${CLASH_RULE_MIRROR_BASE_URL}/MetaCubeX/meta-rules-dat/release/geoip.dat`,
+		'geosite': `${CLASH_RULE_MIRROR_BASE_URL}/MetaCubeX/meta-rules-dat/release/geosite.dat`,
+		'mmdb': `${CLASH_RULE_MIRROR_BASE_URL}/MetaCubeX/meta-rules-dat/release/country.mmdb`,
+		'asn': `${CLASH_RULE_MIRROR_BASE_URL}/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb`
 	},
 	'rule-providers': {
 		// 将由代码自动生成
