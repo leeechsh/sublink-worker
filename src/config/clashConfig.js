@@ -200,6 +200,8 @@ export const CLASH_CONFIG = {
 			'+.wujigg.com',
 			'+.patronum.cc.cd',
 			'+.dpdns.org',
+			'+.cf.090227.xyz',
+			'+.shopify.com',
 		    '+.pub.3gppnetwork.org',
 			]),
 			'MATCH,fake-ip'
