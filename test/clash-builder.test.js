@@ -152,7 +152,7 @@ ss://YWVzLTEyOC1nY206dGVzdA@example.com:445#SE-Oracle-VLESS
     expect(groups.get('☁️ SE')?.proxies).toEqual(['SE-Oracle-VLESS']);
 
     const ai = groups.get('💬 AI 服务');
-    expect(ai?.proxies?.[0]).toBe('⚡ 自动选择');
+    expect(ai?.proxies?.[0]).toBe('🚀 节点选择');
     expect(groups.get('Ⓜ️ 微软服务')?.proxies?.[0]).toBe('DIRECT');
     expect(groups.get('🍏 苹果服务')?.proxies?.[0]).toBe('DIRECT');
     expect(groups.get('📹 油管视频')?.proxies?.[0]).toBe('🚀 节点选择');

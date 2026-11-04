@@ -401,7 +401,7 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
         ]);
         const maxFirst = new Set(['Telegram', 'Github']);
         if (outbound === 'AI Services') {
-            return available([names.auto, names.max, names.pro, names.se, 'DIRECT']);
+            return available([names.node, names.max, names.auto, names.pro, names.se, 'DIRECT']);
         }
         if (nodeFirst.has(outbound)) {
             return available([names.node, names.max, names.auto, names.pro, names.se, 'DIRECT']);
