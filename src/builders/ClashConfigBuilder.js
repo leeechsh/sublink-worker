@@ -395,15 +395,19 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
             return available(['DIRECT', names.node, names.max, names.pro, names.se]);
         }
         const nodeFirst = new Set([
-            'Youtube', 'Google', 'Telegram', 'Github', 'Social Media',
+            'Youtube', 'Google', 'Social Media',
             'Streaming', 'Cloud Services', 'Gaming', 'Education',
             'Financial', 'Bilibili'
         ]);
+        const maxFirst = new Set(['Telegram', 'Github']);
         if (outbound === 'AI Services') {
             return available([names.pro, names.max, names.se, 'DIRECT']);
         }
         if (nodeFirst.has(outbound)) {
             return available([names.node, names.max, names.auto, names.pro, names.se, 'DIRECT']);
+        }
+        if (maxFirst.has(outbound)) {
+            return available([names.max, names.node, names.auto, names.pro, names.se, 'DIRECT']);
         }
         if (outbound === 'Non-China' || outbound === 'Fall Back') {
             return available([names.max, names.auto, names.pro, names.se, 'DIRECT']);
