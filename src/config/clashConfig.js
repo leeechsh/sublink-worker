@@ -218,7 +218,7 @@ export const CLASH_CONFIG = {
 		],
 		//3. 明确国内域名、apple，走阿里/腾讯
 		'nameserver-policy': {
-			'geosite:cn,private,apple,microsoft': [
+			'geosite:cn,private,apple': [
 				'https://223.5.5.5/dns-query',
 				'https://120.53.53.53/dns-query'
 			],
