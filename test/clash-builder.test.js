@@ -155,6 +155,12 @@ ss://YWVzLTEyOC1nY206dGVzdA@example.com:445#SE-Oracle-VLESS
     expect(ai?.proxies?.[0]).toBe('💎 Pro');
     expect(groups.get('Ⓜ️ 微软服务')?.proxies?.[0]).toBe('DIRECT');
     expect(groups.get('🍏 苹果服务')?.proxies?.[0]).toBe('DIRECT');
+    expect(groups.get('📹 油管视频')?.proxies?.[0]).toBe('🚀 节点选择');
+    expect(groups.get('🔍 谷歌服务')?.proxies?.[0]).toBe('🚀 节点选择');
+    expect(groups.get('📲 电报消息')?.proxies?.[0]).toBe('🚀 节点选择');
+    expect(groups.get('🐱 Github')?.proxies?.[0]).toBe('🚀 节点选择');
+    expect(groups.get('🌐 社交媒体')?.proxies?.[0]).toBe('🚀 节点选择');
+    expect(groups.get('🎬 流媒体')?.proxies?.[0]).toBe('🚀 节点选择');
     expect(groups.get('🌐 非中国')?.proxies?.[0]).toBe('📦 Max');
     expect(groups.get('🐟 漏网之鱼')?.proxies?.[0]).toBe('📦 Max');
   });
