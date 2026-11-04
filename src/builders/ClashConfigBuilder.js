@@ -410,7 +410,7 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
             return available([names.max, names.node, names.pro, names.se, 'DIRECT']);
         }
         if (outbound === 'Non-China' || outbound === 'Fall Back') {
-            return available([names.max, names.pro, names.se, 'DIRECT']);
+            return available([names.max, names.node, names.pro, names.se, 'DIRECT']);
         }
         return available([names.node, names.max, names.pro, names.se, 'DIRECT']);
     }

@@ -163,6 +163,8 @@ ss://YWVzLTEyOC1nY206dGVzdA@example.com:445#SE-Oracle-VLESS
     expect(groups.get('🎬 流媒体')?.proxies?.[0]).toBe('🚀 节点选择');
     expect(groups.get('🌐 非中国')?.proxies?.[0]).toBe('📦 Max');
     expect(groups.get('🐟 漏网之鱼')?.proxies?.[0]).toBe('📦 Max');
+    expect(groups.get('🌐 非中国')?.proxies).toContain('🚀 节点选择');
+    expect(groups.get('🐟 漏网之鱼')?.proxies).toContain('🚀 节点选择');
 
     for (const groupName of [
       '💬 AI 服务', '📹 油管视频', '🔍 谷歌服务', '📲 电报消息',
