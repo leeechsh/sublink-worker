@@ -132,4 +132,30 @@ ss://YWVzLTEyOC1nY206dGVzdA@example.com:444#US-Node-1
     expect(googleGroup.proxies).toContain('HK-Node-1');
     expect(googleGroup.proxies).toContain('US-Node-1');
   });
+
+  it('should build tiered Pro, Max and SE groups from prefixed node names', async () => {
+    const input = `
+ss://YWVzLTEyOC1nY206dGVzdA@example.com:443#Pro-DC9-VLESS
+ss://YWVzLTEyOC1nY206dGVzdA@example.com:444#Max-Oracle-CF
+ss://YWVzLTEyOC1nY206dGVzdA@example.com:445#SE-Oracle-VLESS
+    `;
+
+    const builder = new ClashConfigBuilder(input, 'balanced', [], null, 'zh-CN', 'test-agent');
+    const built = yaml.load(await builder.build());
+    const groups = new Map((built['proxy-groups'] || []).map(group => [group.name, group]));
+
+    expect(groups.get('💎 Pro')?.type).toBe('select');
+    expect(groups.get('💎 Pro')?.proxies).toEqual(['Pro-DC9-VLESS']);
+    expect(groups.get('🚀 Max Auto')?.type).toBe('url-test');
+    expect(groups.get('🚀 Max Auto')?.proxies).toEqual(['Max-Oracle-CF']);
+    expect(groups.get('📦 Max')?.proxies?.[0]).toBe('🚀 Max Auto');
+    expect(groups.get('☁️ SE')?.proxies).toEqual(['SE-Oracle-VLESS']);
+
+    const ai = groups.get('💬 AI 服务');
+    expect(ai?.proxies?.[0]).toBe('💎 Pro');
+    expect(groups.get('Ⓜ️ 微软服务')?.proxies?.[0]).toBe('DIRECT');
+    expect(groups.get('🍏 苹果服务')?.proxies?.[0]).toBe('DIRECT');
+    expect(groups.get('🌐 非中国')?.proxies?.[0]).toBe('📦 Max');
+    expect(groups.get('🐟 漏网之鱼')?.proxies?.[0]).toBe('📦 Max');
+  });
 });

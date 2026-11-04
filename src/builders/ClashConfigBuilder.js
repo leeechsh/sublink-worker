@@ -60,6 +60,7 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
         this.enableClashUI = enableClashUI;
         this.externalController = externalController;
         this.externalUiDownloadUrl = externalUiDownloadUrl;
+        this.tieredGroups = null;
     }
 
     /**
@@ -336,9 +337,111 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
         return this.includeAutoSelect && this.hasSelectableSources(proxyList);
     }
 
+    getTieredProxyGroups(proxyList = []) {
+        const inlineNames = uniqueNames(proxyList);
+        const providerNames = uniqueNames(this.providerNodeNames);
+        const names = inlineNames.length > 0 ? inlineNames : providerNames;
+        const hasPrefix = names.some(name => /^(Pro|Max|SE)-/.test(name));
+        if (!hasPrefix) return null;
+
+        const byPrefix = prefix => names.filter(name => name.startsWith(`${prefix}-`));
+        return {
+            pro: byPrefix('Pro'),
+            max: byPrefix('Max'),
+            se: byPrefix('SE'),
+            all: names,
+            inline: inlineNames,
+            providers: this.getAllProviderNames()
+        };
+    }
+
+    addTieredGroup({ name, type = 'select', names = [], filter, url, interval, lazy, tolerance }) {
+        if (this.hasProxyGroup(name)) return false;
+        const inlineNames = this.tieredGroups?.inline?.length > 0;
+        const proxyNames = inlineNames
+            ? uniqueNames(names)
+            : uniqueNames(names).filter(member => this.hasProxyGroup(member));
+        if (proxyNames.length === 0 && !(this.tieredGroups?.providers.length > 0 && names.length > 0)) {
+            return false;
+        }
+        const group = { name, type };
+        if (proxyNames.length > 0) group.proxies = proxyNames;
+        if (this.tieredGroups?.providers.length > 0) {
+            group.use = this.tieredGroups.providers;
+            if (filter) group.filter = filter;
+        }
+        if (url) group.url = url;
+        if (interval !== undefined) group.interval = interval;
+        if (lazy !== undefined) group.lazy = lazy;
+        if (tolerance !== undefined) group.tolerance = tolerance;
+        this.config['proxy-groups'].push(group);
+        return true;
+    }
+
+    getTieredBusinessMembers(outbound) {
+        if (!this.tieredGroups) return null;
+        const names = {
+            pro: '💎 Pro',
+            max: '📦 Max',
+            se: '☁️ SE',
+            auto: '⚡ 自动选择',
+            node: this.t('outboundNames.Node Select')
+        };
+        if (DIRECT_ONLY_RULES.has(outbound)) return ['DIRECT'];
+        const available = members => members.filter(member =>
+            member === 'DIRECT' || member === 'REJECT' || this.hasProxyGroup(member)
+        );
+        if (DIRECT_DEFAULT_RULES.has(outbound)) {
+            return available(['DIRECT', names.node, names.max, names.pro, names.se]);
+        }
+        const maxFirst = new Set([
+            'Youtube', 'Google', 'Telegram', 'Github', 'Social Media',
+            'Streaming', 'Non-China', 'Cloud Services', 'Gaming', 'Education',
+            'Financial', 'Bilibili', 'Fall Back'
+        ]);
+        if (outbound === 'AI Services') {
+            return available([names.pro, names.max, names.se, 'DIRECT']);
+        }
+        if (maxFirst.has(outbound)) {
+            return available([names.max, names.auto, names.pro, names.se, 'DIRECT']);
+        }
+        return available([names.node, names.max, names.pro, names.se, 'DIRECT']);
+    }
+
     addAutoSelectGroup(proxyList) {
         if (!this.includeAutoSelect) return;
         this.config['proxy-groups'] = this.config['proxy-groups'] || [];
+        this.tieredGroups = this.getTieredProxyGroups(proxyList);
+        if (this.tieredGroups) {
+            const { pro, max, se, all, inline, providers } = this.tieredGroups;
+            const source = inline.length > 0 ? inline : all;
+            const prefixFilter = prefix => `^${prefix}-`;
+            this.addTieredGroup({ name: '💎 Pro', names: pro, filter: prefixFilter('Pro') });
+            this.addTieredGroup({
+                name: '🚀 Max Auto',
+                type: 'url-test',
+                names: max,
+                filter: prefixFilter('Max'),
+                url: 'https://www.gstatic.com/generate_204',
+                interval: 300,
+                tolerance: 100,
+                lazy: false
+            });
+            this.addTieredGroup({ name: '📦 Max', names: ['🚀 Max Auto', ...max], filter: prefixFilter('Max') });
+            this.addTieredGroup({ name: '☁️ SE', names: se, filter: prefixFilter('SE') });
+            this.addTieredGroup({ name: '🌐 All Nodes', names: source });
+            this.addTieredGroup({
+                name: '⚡ 自动选择',
+                type: 'url-test',
+                names: [...max, ...se],
+                filter: '^(Max|SE)-',
+                url: 'https://www.gstatic.com/generate_204',
+                interval: 300,
+                lazy: false
+            });
+            return;
+        }
+
         const autoName = this.t('outboundNames.Auto Select');
         if (this.hasProxyGroup(autoName)) return;
         const providerNames = this.getAllProviderNames();
@@ -364,7 +467,9 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
         this.config['proxy-groups'] = this.config['proxy-groups'] || [];
         const nodeName = this.t('outboundNames.Node Select');
         if (this.hasProxyGroup(nodeName)) return;
-        const list = buildNodeSelectMembers({
+        const list = this.tieredGroups
+            ? ['📦 Max', '⚡ 自动选择', '💎 Pro', '☁️ SE', '🌐 All Nodes', 'DIRECT', 'REJECT']
+            : buildNodeSelectMembers({
             proxyList,
             translator: this.t,
             groupByCountry: this.groupByCountry,
@@ -389,6 +494,9 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
     }
 
     buildSelectGroupMembers(proxyList = []) {
+        if (this.tieredGroups) {
+            return this.getTieredBusinessMembers('default').concat(['REJECT']);
+        }
         return buildSelectorMembers({
             proxyList,
             translator: this.t,
@@ -404,7 +512,7 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
             if (outbound !== this.t('outboundNames.Node Select')) {
                 const name = this.t(`outboundNames.${outbound}`);
                 if (!this.hasProxyGroup(name)) {
-                    let proxies = this.buildSelectGroupMembers(proxyList);
+                    let proxies = this.getTieredBusinessMembers(outbound) || this.buildSelectGroupMembers(proxyList);
                     if (DIRECT_ONLY_RULES.has(outbound)) {
                         proxies = ['DIRECT'];
                     }
@@ -459,7 +567,9 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
         const name = this.t('outboundNames.Fall Back');
         if (this.hasProxyGroup(name)) return;
         const selectableProxies = this.buildSelectGroupMembers(proxyList);
-        const proxies = ['DIRECT', ...selectableProxies.filter(proxy => proxy !== 'DIRECT')];
+        const proxies = this.tieredGroups
+            ? this.getTieredBusinessMembers('Fall Back').concat(['REJECT'])
+            : ['DIRECT', ...selectableProxies.filter(proxy => proxy !== 'DIRECT')];
         const group = {
             type: "select",
             name,
@@ -549,14 +659,17 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
 
         const nodeSelectGroup = this.config['proxy-groups'].find(g => g && g.name === this.t('outboundNames.Node Select'));
         if (nodeSelectGroup && Array.isArray(nodeSelectGroup.proxies)) {
-            const rebuilt = buildNodeSelectMembers({
-                proxyList: [],
-                translator: this.t,
-                groupByCountry: true,
-                manualGroupName,
-                countryGroupNames,
-                includeAutoSelect: this.shouldIncludeAutoSelectGroup(this.getProxyList())
-            });
+            const rebuilt = this.tieredGroups
+                ? ['📦 Max', '⚡ 自动选择', '💎 Pro', '☁️ SE', '🌐 All Nodes', manualGroupName, ...countryGroupNames, 'DIRECT', 'REJECT']
+                    .filter(Boolean)
+                : buildNodeSelectMembers({
+                    proxyList: [],
+                    translator: this.t,
+                    groupByCountry: true,
+                    manualGroupName,
+                    countryGroupNames,
+                    includeAutoSelect: this.shouldIncludeAutoSelectGroup(this.getProxyList())
+                });
             nodeSelectGroup.proxies = rebuilt;
         }
         this.countryGroupNames = countryGroupNames;
