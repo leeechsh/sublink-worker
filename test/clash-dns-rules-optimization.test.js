@@ -22,7 +22,7 @@ describe('Clash DNS and routing defaults', () => {
         expect(dns['fake-ip-filter']).toContain('RULE-SET,private,real-ip');
         expect(dns['fake-ip-filter']).toContain('RULE-SET,custom-direct,real-ip');
         expect(dns['fake-ip-filter'].at(-1)).toBe('MATCH,fake-ip');
-        expect(dns['nameserver-policy']['geosite:cn,private,apple,microsoft']).toHaveLength(2);
+        expect(dns['nameserver-policy']['geosite:cn,private,apple']).toHaveLength(2);
         expect(dns['nameserver-policy']['geosite:geolocation-!cn']).toHaveLength(2);
         expect(dns['proxy-server-nameserver']).toEqual([
             'https://223.5.5.5/dns-query',
