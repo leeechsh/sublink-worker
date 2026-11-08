@@ -220,6 +220,12 @@ export const CLASH_CONFIG = {
 			'*.cf.090227.xyz',
 			'*.shopify.com',
 			'*.pub.3gppnetwork.org',
+			'*.myip.ipip.net',
+            '*ipip.net',
+            '*.ip.sb',
+            '*.ipapi.is',
+            '*.ipwho.is',
+            '*.ipinfo.io',
 			]),
 			'MATCH,fake-ip'
 		],
