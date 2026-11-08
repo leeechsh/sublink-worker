@@ -47,6 +47,37 @@ export const CLASH_CONFIG = {
 	'geo-auto-update': true,
 	'geodata-loader': 'standard',
 	'geo-update-interval': 24,
+	'sniffer': {
+		'enable': true,
+		'override-destination': true,
+		'sniff': {
+			'QUIC': {
+				'ports': [443]
+			},
+			'TLS': {
+				'ports': [443, 8443]
+			},
+			'HTTP': {
+				'ports': [80, '8080-8880'],
+				'override-destination': true
+			}
+		},
+		'force-domain': [
+			'+.netflix.com',
+			'+.nflxvideo.net',
+			'+.amazonaws.com',
+			'+.media.dssott.com'
+		],
+		'skip-domain': [
+			'+.apple.com',
+			'dlg.io.mi.com',
+			'+.oray.com',
+			'+.sunlogin.net',
+			'+.push.apple.com'
+		],
+		'parse-pure-ip': true,
+		'force-dns-mapping': false
+	},
 	'geox-url': {
 		'geoip': `${CLASH_RULE_MIRROR_BASE_URL}/MetaCubeX/meta-rules-dat/release/geoip.dat`,
 		'geosite': `${CLASH_RULE_MIRROR_BASE_URL}/MetaCubeX/meta-rules-dat/release/geosite.dat`,

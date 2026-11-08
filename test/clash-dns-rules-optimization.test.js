@@ -32,6 +32,32 @@ describe('Clash DNS and routing defaults', () => {
         expect(dns['direct-nameserver-follow-policy']).toBe(false);
     });
 
+    it('enables Clash sniffer with the configured protocol and domain policies', () => {
+        const { sniffer } = CLASH_CONFIG;
+
+        expect(sniffer.enable).toBe(true);
+        expect(sniffer['override-destination']).toBe(true);
+        expect(sniffer.sniff.QUIC.ports).toEqual([443]);
+        expect(sniffer.sniff.TLS.ports).toEqual([443, 8443]);
+        expect(sniffer.sniff.HTTP.ports).toEqual([80, '8080-8880']);
+        expect(sniffer.sniff.HTTP['override-destination']).toBe(true);
+        expect(sniffer['force-domain']).toEqual([
+            '+.netflix.com',
+            '+.nflxvideo.net',
+            '+.amazonaws.com',
+            '+.media.dssott.com'
+        ]);
+        expect(sniffer['skip-domain']).toEqual([
+            '+.apple.com',
+            'dlg.io.mi.com',
+            '+.oray.com',
+            '+.sunlogin.net',
+            '+.push.apple.com'
+        ]);
+        expect(sniffer['parse-pure-ip']).toBe(true);
+        expect(sniffer['force-dns-mapping']).toBe(false);
+    });
+
     it('removes exact domains covered by suffix rules and keeps wildcard syntax valid', () => {
         const filters = CLASH_CONFIG.dns['fake-ip-filter'];
 
