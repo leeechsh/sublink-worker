@@ -32,6 +32,17 @@ describe('Clash DNS and routing defaults', () => {
         expect(dns['direct-nameserver-follow-policy']).toBe(false);
     });
 
+    it('removes exact domains covered by suffix rules and keeps wildcard syntax valid', () => {
+        const filters = CLASH_CONFIG.dns['fake-ip-filter'];
+
+        expect(filters).not.toContain('DOMAIN,music.163.com,real-ip');
+        expect(filters).toContain('DOMAIN-SUFFIX,music.163.com,real-ip');
+        expect(filters).not.toContain('DOMAIN-SUFFIX,*.xboxlive.com,real-ip');
+        expect(filters).not.toContain('DOMAIN-SUFFIX,stun.*.*,real-ip');
+        expect(filters).toContain('DOMAIN-WILDCARD,*.*.xboxlive.com,real-ip');
+        expect(filters).toContain('DOMAIN-WILDCARD,stun.*.*,real-ip');
+    });
+
     it('puts private and custom direct rules before custom proxy rules', () => {
         const rules = emitClashRules(generateRules('minimal'), translate);
 
