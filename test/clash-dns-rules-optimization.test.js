@@ -22,6 +22,10 @@ describe('Clash DNS and routing defaults', () => {
         expect(dns['fake-ip-filter']).toContain('RULE-SET,private,real-ip');
         expect(dns['fake-ip-filter']).toContain('RULE-SET,custom-direct,real-ip');
         expect(dns['fake-ip-filter'].at(-1)).toBe('MATCH,fake-ip');
+        expect(dns['nameserver-policy']['geosite:microsoft']).toEqual([
+            'https://cloudflare-dns.com/dns-query',
+            'https://dns.google/dns-query'
+        ]);
         expect(dns['nameserver-policy']['geosite:cn,private,apple']).toHaveLength(2);
         expect(dns['nameserver-policy']['geosite:geolocation-!cn']).toHaveLength(2);
         expect(dns['proxy-server-nameserver']).toEqual([
@@ -29,7 +33,7 @@ describe('Clash DNS and routing defaults', () => {
             'https://120.53.53.53/dns-query'
         ]);
         expect(dns['direct-nameserver']).toEqual(dns['proxy-server-nameserver']);
-        expect(dns['direct-nameserver-follow-policy']).toBe(false);
+        expect(dns['direct-nameserver-follow-policy']).toBe(true);
     });
 
     it('enables Clash sniffer with the configured protocol and domain policies', () => {

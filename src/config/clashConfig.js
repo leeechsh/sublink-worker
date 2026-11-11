@@ -270,8 +270,12 @@ export const CLASH_CONFIG = {
 			'https://223.5.5.5/dns-query',
 			'https://120.53.53.53/dns-query'
 		],
-		//3. 明确国内域名、apple，走阿里/腾讯
+		//3. Microsoft and other overseas domains use independent public DoH resolvers
 		'nameserver-policy': {
+			'geosite:microsoft': [
+				'https://cloudflare-dns.com/dns-query',
+				'https://dns.google/dns-query'
+			],
 			'geosite:cn,private,apple': [
 				'https://223.5.5.5/dns-query',
 				'https://120.53.53.53/dns-query'
@@ -291,8 +295,8 @@ export const CLASH_CONFIG = {
 			'https://223.5.5.5/dns-query',
 			'https://120.53.53.53/dns-query'
 		],
-		// 直连出口固定使用 direct-nameserver，避免再次被境外 policy 改写
-		'direct-nameserver-follow-policy': false
+		// Keep DIRECT resolution consistent with domain-specific DNS policies.
+		'direct-nameserver-follow-policy': true
 
 	},
 		'proxies': [],
