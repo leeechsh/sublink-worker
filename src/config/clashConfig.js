@@ -257,6 +257,7 @@ export const CLASH_CONFIG = {
             '*.ipapi.is',
             '*.ipwho.is',
             '*.ipinfo.io',
+			'*.ieee.bbroot.com',
 			]),
 			'MATCH,fake-ip'
 		],
