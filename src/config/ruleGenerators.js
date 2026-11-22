@@ -5,7 +5,7 @@
 
 import { UNIFIED_RULES, PREDEFINED_RULE_SETS } from './rules.js';
 import { SITE_RULE_SET_BASE_URL, IP_RULE_SET_BASE_URL, CLASH_SITE_RULE_SET_BASE_URL, CLASH_IP_RULE_SET_BASE_URL } from './ruleUrls.js';
-import { getCustomSiteRuleSource } from './customRemoteRuleSources.js';
+import { CLASH_FAKE_IP_REAL_RULE_URL, getCustomSiteRuleSource } from './customRemoteRuleSources.js';
 
 function toStringArray(value) {
 	if (Array.isArray(value)) {
@@ -225,6 +225,16 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			});
 		});
 	}
+
+	// The DNS-only provider uses classical YAML to preserve wildcard matching.
+	site_rule_providers['fake-ip-real'] = {
+		type: 'http',
+		behavior: 'classical',
+		format: 'yaml',
+		url: CLASH_FAKE_IP_REAL_RULE_URL,
+		path: './ruleset/fake-ip-real.yaml',
+		interval: 86400
+	};
 
 	return { site_rule_providers, ip_rule_providers };
 }

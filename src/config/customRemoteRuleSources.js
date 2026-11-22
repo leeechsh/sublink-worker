@@ -2,6 +2,8 @@ import { CLASH_RULE_MIRROR_BASE_URL } from './ruleUrls.js';
 const CUSTOM_RULES_REPO_BASE = 'https://raw.githubusercontent.com/leeechsh/meta-custom-rules-dat';
 const CLASH_CUSTOM_RULES_REPO_BASE = `${CLASH_RULE_MIRROR_BASE_URL}/leeechsh/meta-custom-rules-dat`;
 
+export const CLASH_FAKE_IP_REAL_RULE_URL = `${CLASH_CUSTOM_RULES_REPO_BASE}/meta/geosite/fake-ip-real.yaml`;
+
 export const CUSTOM_REMOTE_SITE_RULE_SOURCES = {
     'custom-proxy': {
         singbox: `${CUSTOM_RULES_REPO_BASE}/sing/geosite/custom-proxy.srs`,

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import yaml from 'js-yaml';
 import { CLASH_CONFIG } from '../src/config/clashConfig.js';
+import { ClashConfigBuilder } from '../src/builders/ClashConfigBuilder.js';
 import { generateClashRuleSets, generateRules } from '../src/config/ruleGenerators.js';
 import { emitClashRules } from '../src/builders/helpers/clashConfigUtils.js';
 
@@ -19,9 +21,14 @@ describe('Clash DNS and routing defaults', () => {
 
         expect(dns['cache-algorithm']).toBe('arc');
         expect(dns['fake-ip-filter-mode']).toBe('rule');
-        expect(dns['fake-ip-filter']).toContain('RULE-SET,private,real-ip');
-        expect(dns['fake-ip-filter']).toContain('RULE-SET,custom-direct,real-ip');
-        expect(dns['fake-ip-filter'].at(-1)).toBe('MATCH,fake-ip');
+        expect(dns['fake-ip-filter']).toEqual([
+            'RULE-SET,private,real-ip',
+            'RULE-SET,custom-direct,real-ip',
+            'RULE-SET,fake-ip-real,real-ip',
+            'DOMAIN-SUFFIX,ieee.bbroot.com,real-ip',
+            'DOMAIN-SUFFIX,nxtrace.org,real-ip',
+            'MATCH,fake-ip'
+        ]);
         expect(dns['nameserver-policy']['geosite:microsoft']).toEqual([
             'https://cloudflare-dns.com/dns-query',
             'https://dns.google/dns-query'
@@ -62,16 +69,24 @@ describe('Clash DNS and routing defaults', () => {
         expect(sniffer['force-dns-mapping']).toBe(false);
     });
 
-    it('removes exact domains covered by suffix rules and keeps wildcard syntax valid', () => {
-        const filters = CLASH_CONFIG.dns['fake-ip-filter'];
+    it.each([['mihomo', 'mrs'], ['Clash/1.0', 'yaml']])(
+        'emits a DNS-only classical provider for %s without changing the custom-direct format',
+        async (userAgent, customDirectFormat) => {
+            const builder = new ClashConfigBuilder('', 'balanced', [], null, 'zh-CN', userAgent);
+            const config = yaml.load(await builder.build());
+            const providers = config['rule-providers'];
 
-        expect(filters).not.toContain('DOMAIN,music.163.com,real-ip');
-        expect(filters).toContain('DOMAIN-SUFFIX,music.163.com,real-ip');
-        expect(filters).not.toContain('DOMAIN-SUFFIX,*.xboxlive.com,real-ip');
-        expect(filters).not.toContain('DOMAIN-SUFFIX,stun.*.*,real-ip');
-        expect(filters).toContain('DOMAIN-WILDCARD,*.*.xboxlive.com,real-ip');
-        expect(filters).toContain('DOMAIN-WILDCARD,stun.*.*,real-ip');
-    });
+            expect(config.dns['fake-ip-filter']).toContain('RULE-SET,fake-ip-real,real-ip');
+            expect(providers['fake-ip-real']).toMatchObject({
+                type: 'http',
+                behavior: 'classical',
+                format: 'yaml',
+                url: 'https://gh.ieee.dpdns.org/leeechsh/meta-custom-rules-dat/meta/geosite/fake-ip-real.yaml'
+            });
+            expect(providers['custom-direct'].format).toBe(customDirectFormat);
+            expect(config.rules.some(rule => rule.includes('fake-ip-real'))).toBe(false);
+        }
+    );
 
     it('puts private and custom direct rules before custom proxy rules', () => {
         const rules = emitClashRules(generateRules('minimal'), translate);
@@ -104,5 +119,6 @@ describe('Clash DNS and routing defaults', () => {
 
         expect(providers).toHaveProperty('private');
         expect(providers).toHaveProperty('custom-direct');
+        expect(providers).toHaveProperty('fake-ip-real');
     });
 });
