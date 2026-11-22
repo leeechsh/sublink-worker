@@ -66,8 +66,6 @@ export const CLASH_CONFIG = {
 			'RULE-SET,private,real-ip',
 			'RULE-SET,custom-direct,real-ip',
 			'RULE-SET,fake-ip-real,real-ip',
-			'DOMAIN-SUFFIX,ieee.bbroot.com,real-ip',
-			'DOMAIN-SUFFIX,nxtrace.org,real-ip',
 			'MATCH,fake-ip'
 		],
 		// 1. Bootstrap DNS：用于解析 DoH 服务器本身的域名（必须是 IP 或能直接到达的）

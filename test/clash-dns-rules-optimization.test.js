@@ -25,8 +25,6 @@ describe('Clash DNS and routing defaults', () => {
             'RULE-SET,private,real-ip',
             'RULE-SET,custom-direct,real-ip',
             'RULE-SET,fake-ip-real,real-ip',
-            'DOMAIN-SUFFIX,ieee.bbroot.com,real-ip',
-            'DOMAIN-SUFFIX,nxtrace.org,real-ip',
             'MATCH,fake-ip'
         ]);
         expect(dns['nameserver-policy']['geosite:microsoft']).toEqual([
