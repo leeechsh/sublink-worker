@@ -23,16 +23,14 @@ describe('Clash DNS and routing defaults', () => {
         expect(dns['fake-ip-filter-mode']).toBe('rule');
         expect(dns['fake-ip-filter']).toEqual([
             'RULE-SET,private,real-ip',
-            'RULE-SET,custom-direct,real-ip',
             'RULE-SET,fake-ip-real,real-ip',
             'MATCH,fake-ip'
         ]);
-        expect(dns['nameserver-policy']['geosite:microsoft']).toEqual([
-            'https://cloudflare-dns.com/dns-query',
-            'https://dns.google/dns-query'
-        ]);
-        expect(dns['nameserver-policy']['geosite:cn,private,apple']).toHaveLength(2);
-        expect(dns['nameserver-policy']['geosite:geolocation-!cn']).toHaveLength(2);
+        expect(dns['nameserver-policy']).toEqual({
+            'rule-set:microsoft': ['https://cloudflare-dns.com/dns-query', 'https://dns.google/dns-query'],
+            'rule-set:cn,private,apple': ['https://223.5.5.5/dns-query', 'https://120.53.53.53/dns-query'],
+            'rule-set:geolocation-!cn': ['https://cloudflare-dns.com/dns-query', 'https://dns.google/dns-query']
+        });
         expect(dns['proxy-server-nameserver']).toEqual([
             'https://223.5.5.5/dns-query',
             'https://120.53.53.53/dns-query'
@@ -112,11 +110,21 @@ describe('Clash DNS and routing defaults', () => {
         expect(legacy.ip_rule_providers['cn-ip'].url).toBe('https://gh.ieee.dpdns.org/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.yaml');
     });
 
-    it('always includes providers referenced by fake IP rules', () => {
+    it('includes providers for default and overridden fake IP rules', () => {
         const providers = generateClashRuleSets(['Non-China']).site_rule_providers;
 
         expect(providers).toHaveProperty('private');
         expect(providers).toHaveProperty('custom-direct');
         expect(providers).toHaveProperty('fake-ip-real');
+    });
+
+    it('keeps DNS policy providers available without enabling their routing rules', async () => {
+        const builder = new ClashConfigBuilder('', ['Github'], [], null, 'zh-CN', 'mihomo');
+        const config = yaml.load(await builder.build());
+
+        for (const name of ['microsoft', 'cn', 'private', 'apple', 'geolocation-!cn']) {
+            expect(config['rule-providers'][name]).toMatchObject({ behavior: 'domain', format: 'mrs' });
+            expect(config.rules.some(rule => rule.startsWith(`RULE-SET,${name},`))).toBe(false);
+        }
     });
 });

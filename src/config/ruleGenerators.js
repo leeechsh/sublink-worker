@@ -4,6 +4,7 @@
  */
 
 import { UNIFIED_RULES, PREDEFINED_RULE_SETS } from './rules.js';
+import { CLASH_CONFIG } from './clashConfig.js';
 import { SITE_RULE_SET_BASE_URL, IP_RULE_SET_BASE_URL, CLASH_SITE_RULE_SET_BASE_URL, CLASH_IP_RULE_SET_BASE_URL } from './ruleUrls.js';
 import { CLASH_FAKE_IP_REAL_RULE_URL, getCustomSiteRuleSource } from './customRemoteRuleSources.js';
 
@@ -174,7 +175,15 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 		}
 	});
 
-	// The Clash DNS fake-IP rules always reference these providers.
+	// DNS policies still need their providers when the corresponding routes are disabled.
+	for (const policy of Object.keys(CLASH_CONFIG.dns['nameserver-policy'])) {
+		if (!policy.startsWith('rule-set:')) continue;
+		for (const name of policy.slice('rule-set:'.length).split(',')) {
+			siteRuleSets.add(name);
+		}
+	}
+
+	// Keep private and custom-direct available for fake-IP filters and overrides.
 	['private', 'custom-direct'].forEach(rule => siteRuleSets.add(rule));
 
 	const site_rule_providers = {};
@@ -194,18 +203,6 @@ export function generateClashRuleSets(selectedRules = [], customRules = [], useM
 			interval: 86400
 		};
 	});
-
-	// Add Non-China rule set if not included
-	if (!selectedRules.includes('Non-China')) {
-		site_rule_providers['geolocation-!cn'] = {
-			type: 'http',
-			format: format,
-			behavior: 'domain',
-			url: `${CLASH_SITE_RULE_SET_BASE_URL}geolocation-!cn${ext}`,
-			path: `./ruleset/geolocation-!cn${ext}`,
-			interval: 86400
-		};
-	}
 
 	// Add custom rules
 	if (customRules) {

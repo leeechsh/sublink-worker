@@ -9,6 +9,7 @@ export const CLASH_CONFIG = {
 	'port': 2333,
 	'socks-port': 2334,
 	'allow-lan': false,
+	'tcp-concurrent': true,
 	'mode': 'rule',
 	'log-level': 'info',
 	'geodata-mode': true,
@@ -64,7 +65,6 @@ export const CLASH_CONFIG = {
 		'fake-ip-filter-mode': 'rule',
 		'fake-ip-filter': [
 			'RULE-SET,private,real-ip',
-			'RULE-SET,custom-direct,real-ip',
 			'RULE-SET,fake-ip-real,real-ip',
 			'MATCH,fake-ip'
 		],
@@ -80,15 +80,15 @@ export const CLASH_CONFIG = {
 		],
 		//3. Microsoft and other overseas domains use independent public DoH resolvers
 		'nameserver-policy': {
-			'geosite:microsoft': [
+			'rule-set:microsoft': [
 				'https://cloudflare-dns.com/dns-query',
 				'https://dns.google/dns-query'
 			],
-			'geosite:cn,private,apple': [
+			'rule-set:cn,private,apple': [
 				'https://223.5.5.5/dns-query',
 				'https://120.53.53.53/dns-query'
 			],
-			'geosite:geolocation-!cn': [
+			'rule-set:geolocation-!cn': [
 				'https://cloudflare-dns.com/dns-query',
 				'https://dns.google/dns-query'
 			]
