@@ -78,15 +78,15 @@ export const CLASH_CONFIG = {
 			'https://223.5.5.5/dns-query',
 			'https://120.53.53.53/dns-query'
 		],
-		//3. Microsoft and other overseas domains use independent public DoH resolvers
+		// Prefer domestic DNS for domains shared by the CN and Microsoft rule sets.
 		'nameserver-policy': {
-			'rule-set:microsoft': [
-				'https://cloudflare-dns.com/dns-query',
-				'https://dns.google/dns-query'
-			],
 			'rule-set:cn,private,apple': [
 				'https://223.5.5.5/dns-query',
 				'https://120.53.53.53/dns-query'
+			],
+			'rule-set:microsoft': [
+				'https://cloudflare-dns.com/dns-query',
+				'https://dns.google/dns-query'
 			],
 			'rule-set:geolocation-!cn': [
 				'https://cloudflare-dns.com/dns-query',

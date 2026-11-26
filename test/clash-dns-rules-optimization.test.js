@@ -26,11 +26,11 @@ describe('Clash DNS and routing defaults', () => {
             'RULE-SET,fake-ip-real,real-ip',
             'MATCH,fake-ip'
         ]);
-        expect(dns['nameserver-policy']).toEqual({
-            'rule-set:microsoft': ['https://cloudflare-dns.com/dns-query', 'https://dns.google/dns-query'],
-            'rule-set:cn,private,apple': ['https://223.5.5.5/dns-query', 'https://120.53.53.53/dns-query'],
-            'rule-set:geolocation-!cn': ['https://cloudflare-dns.com/dns-query', 'https://dns.google/dns-query']
-        });
+        expect(Object.entries(dns['nameserver-policy'])).toEqual([
+            ['rule-set:cn,private,apple', ['https://223.5.5.5/dns-query', 'https://120.53.53.53/dns-query']],
+            ['rule-set:microsoft', ['https://cloudflare-dns.com/dns-query', 'https://dns.google/dns-query']],
+            ['rule-set:geolocation-!cn', ['https://cloudflare-dns.com/dns-query', 'https://dns.google/dns-query']]
+        ]);
         expect(dns['proxy-server-nameserver']).toEqual([
             'https://223.5.5.5/dns-query',
             'https://120.53.53.53/dns-query'
