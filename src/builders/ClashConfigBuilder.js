@@ -49,10 +49,8 @@ function getClashUdpValue(proxy, defaultEnabled = true) {
 
 export class ClashConfigBuilder extends BaseConfigBuilder {
     constructor(inputString, selectedRules, customRules, baseConfig, lang, userAgent, groupByCountry = false, enableClashUI = false, externalController, externalUiDownloadUrl, includeAutoSelect = true) {
-        if (!baseConfig) {
-            baseConfig = CLASH_CONFIG;
-        }
-        super(inputString, baseConfig, lang, userAgent, groupByCountry, includeAutoSelect);
+        super(inputString, baseConfig || CLASH_CONFIG, lang, userAgent, groupByCountry, includeAutoSelect);
+        this.usesDefaultBaseConfig = !baseConfig;
         this.selectedRules = selectedRules;
         this.customRules = customRules;
         this.countryGroupNames = [];
@@ -61,6 +59,15 @@ export class ClashConfigBuilder extends BaseConfigBuilder {
         this.externalController = externalController;
         this.externalUiDownloadUrl = externalUiDownloadUrl;
         this.tieredGroups = null;
+    }
+
+    applyConfigOverrides(overrides) {
+        // Explicit HTTP or SOCKS listeners may already use the default mixed port.
+        if (this.usesDefaultBaseConfig && overrides && !this.appliedOverrideKeys.has('mixed-port') &&
+            (Object.hasOwn(overrides, 'port') || Object.hasOwn(overrides, 'socks-port'))) {
+            delete this.config['mixed-port'];
+        }
+        super.applyConfigOverrides(overrides);
     }
 
     /**

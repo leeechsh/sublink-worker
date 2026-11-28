@@ -8,6 +8,35 @@ import { sanitizeClashProxyGroups } from '../src/builders/helpers/clashConfigUti
 const t = createTranslator('zh-CN');
 
 describe('Clash Builder Tests', () => {
+  it('generates only a mixed proxy port and enables TCP concurrency by default', async () => {
+    const builder = new ClashConfigBuilder('', 'minimal', [], null, 'zh-CN', 'mihomo');
+    const built = yaml.load(await builder.build());
+
+    expect(built).toMatchObject({ 'mixed-port': 2333, 'allow-lan': false, 'tcp-concurrent': true });
+    expect(built).not.toHaveProperty('port');
+    expect(built).not.toHaveProperty('socks-port');
+  });
+
+  it.each([
+    ['port: 2333\nsocks-port: 2334', undefined],
+    ['port: 2333\nsocks-port: 2334\nmixed-port: 7890', 7890]
+  ])('preserves explicit proxy ports in imported YAML', async (ports, mixedPort) => {
+    const input = `${ports}
+tcp-concurrent: false
+proxies:
+  - name: local
+    type: ss
+    server: example.com
+    port: 443
+    cipher: aes-128-gcm
+    password: test`;
+    const builder = new ClashConfigBuilder(input, 'minimal', [], null, 'zh-CN', 'mihomo');
+    const built = yaml.load(await builder.build());
+
+    expect(built).toMatchObject({ port: 2333, 'socks-port': 2334, 'tcp-concurrent': false });
+    expect(built['mixed-port']).toBe(mixedPort);
+  });
+
   it('should clean up proxy-groups and remove non-existent proxies', async () => {
     const input = `
 proxies:

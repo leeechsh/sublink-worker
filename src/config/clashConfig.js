@@ -6,8 +6,7 @@ import { CLASH_RULE_MIRROR_BASE_URL } from './ruleUrls.js';
  */
 
 export const CLASH_CONFIG = {
-	'port': 2333,
-	'socks-port': 2334,
+	'mixed-port': 2333,
 	'allow-lan': false,
 	'tcp-concurrent': true,
 	'mode': 'rule',
